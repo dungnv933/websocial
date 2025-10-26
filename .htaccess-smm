@@ -1,0 +1,14 @@
+# SMM Panel - .htaccess Configuration
+RewriteEngine On
+
+# Route /admin to admin.html
+RewriteRule ^admin$ admin.html [L]
+
+# Route /api/* to backend
+RewriteRule ^api/(.*)$ admin.php?route=api/$1 [L,QSA]
+
+# Route /docs, /health to backend
+RewriteRule ^(docs|health)$ admin.php?route=$1 [L,QSA]
+
+# Route root to admin
+RewriteRule ^$ admin.html [L]

@@ -1,0 +1,20 @@
+# SMM Panel - .htaccess Configuration
+# Frontend: https://social.homemmo.store/
+# Backend Admin: https://social.homemmo.store/admin
+
+RewriteEngine On
+
+# Admin Dashboard - Route /admin to admin.html
+RewriteRule ^admin$ admin.html [L]
+
+# API Proxy - Route /api/* to backend Python
+RewriteRule ^api/(.*)$ admin.php?route=api/$1 [L,QSA]
+
+# Health check to backend
+RewriteRule ^health$ admin.php?route=health [L]
+
+# Docs to backend  
+RewriteRule ^docs$ admin.php?route=docs [L]
+
+# Root for frontend (index.html)
+DirectoryIndex index.html

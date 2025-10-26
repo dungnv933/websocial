@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOMEMMO - SMM Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Header -->
+<header class="main-header">
+    <div class="container-fluid">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1 class="logo">HOMEMMO</h1>
+                <p class="tagline">like thấp muốn nôi</p>
+            </div>
+            <div class="user-section">
+                <div class="user-info">
+                    <span class="user-name">Hi! <strong>dungnv933</strong> ⭐⭐⭐</span>
+                    <div class="balance">
+                        <span class="balance-label">Số dư:</span>
+                        <span class="balance-amount">2.390.000đ</span>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <button class="btn btn-outline-primary btn-sm me-2">
+                        <i class="fas fa-tags"></i> Bảng giá
+                    </button>
+                    <button class="btn btn-success btn-sm me-2" onclick="showDepositModal()">
+                        <i class="fas fa-plus"></i> Nạp tiền
+                    </button>
+                    <button class="btn btn-info btn-sm" onclick="showProfile()">
+                        <i class="fas fa-user"></i> Thông tin
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Warning Banner -->
+    <div class="warning-banner">
+        <div class="container-fluid">
+            <div class="alert alert-danger mb-0 text-center">
+                <i class="fas fa-exclamation-triangle"></i> Vui lòng Cập nhật Email!
+            </div>
+        </div>
+    </div>
+</header>
+
+<!-- Main Content -->
+<div class="main-container">
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-lg-3 col-md-4 sidebar">
+                <div class="sidebar-content">
+                    <h5 class="sidebar-title">
+                        <i class="fas fa-list"></i> Danh mục dịch vụ
+                    </h5>
+                    
+                    <!-- Facebook Services -->
+                    <div class="service-category">
+                        <div class="category-header" onclick="toggleCategory('facebook')">
+                            <i class="fab fa-facebook text-primary"></i> Facebook <span class="badge bg-primary">(45)</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="category-content" id="facebook-category">
+                            <div class="service-item" onclick="selectService('fb-likes', 'Tăng Like Facebook', 100, 10000, 500)">
+                                <span class="service-icon">👍</span>
+                                <span class="service-name">Tăng Like Facebook</span>
+                                <span class="service-price">500đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('fb-followers', 'Tăng Follow Facebook', 50, 5000, 1000)">
+                                <span class="service-icon">👥</span>
+                                <span class="service-name">Tăng Follow Facebook</span>
+                                <span class="service-price">1.000đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('fb-shares', 'Tăng Share Facebook', 20, 2000, 800)">
+                                <span class="service-icon">📤</span>
+                                <span class="service-name">Tăng Share Facebook</span>
+                                <span class="service-price">800đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- TikTok Services -->
+                    <div class="service-category">
+                        <div class="category-header" onclick="toggleCategory('tiktok')">
+                            <i class="fab fa-tiktok text-dark"></i> TikTok <span class="badge bg-dark">(38)</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="category-content" id="tiktok-category">
+                            <div class="service-item" onclick="selectService('tiktok-followers', 'Tăng Follow TikTok', 100, 10000, 2000)">
+                                <span class="service-icon">👥</span>
+                                <span class="service-name">Tăng Follow TikTok</span>
+                                <span class="service-price">2.000đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('tiktok-likes', 'Tăng Like TikTok', 200, 20000, 300)">
+                                <span class="service-icon">❤️</span>
+                                <span class="service-name">Tăng Like TikTok</span>
+                                <span class="service-price">300đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('tiktok-views', 'Tăng View TikTok', 500, 50000, 100)">
+                                <span class="service-icon">👁️</span>
+                                <span class="service-name">Tăng View TikTok</span>
+                                <span class="service-price">100đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- YouTube Services -->
+                    <div class="service-category">
+                        <div class="category-header" onclick="toggleCategory('youtube')">
+                            <i class="fab fa-youtube text-danger"></i> YouTube <span class="badge bg-danger">(52)</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="category-content" id="youtube-category">
+                            <div class="service-item" onclick="selectService('yt-subscribers', 'Tăng Sub YouTube', 50, 5000, 5000)">
+                                <span class="service-icon">📺</span>
+                                <span class="service-name">Tăng Sub YouTube</span>
+                                <span class="service-price">5.000đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('yt-views', 'Tăng View YouTube', 1000, 100000, 200)">
+                                <span class="service-icon">👁️</span>
+                                <span class="service-name">Tăng View YouTube</span>
+                                <span class="service-price">200đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('yt-likes', 'Tăng Like YouTube', 100, 10000, 300)">
+                                <span class="service-icon">👍</span>
+                                <span class="service-name">Tăng Like YouTube</span>
+                                <span class="service-price">300đ</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Instagram Services -->
+                    <div class="service-category">
+                        <div class="category-header" onclick="toggleCategory('instagram')">
+                            <i class="fab fa-instagram text-danger"></i> Instagram <span class="badge bg-danger">(29)</span>
+                            <i class="fas fa-chevron-down toggle-icon"></i>
+                        </div>
+                        <div class="category-content" id="instagram-category">
+                            <div class="service-item" onclick="selectService('ig-followers', 'Tăng Follow Instagram', 100, 10000, 3000)">
+                                <span class="service-icon">👥</span>
+                                <span class="service-name">Tăng Follow Instagram</span>
+                                <span class="service-price">3.000đ</span>
+                            </div>
+                            <div class="service-item" onclick="selectService('ig-likes', 'Tăng Like Instagram', 200, 20000, 500)">
+                                <span class="service-icon">❤️</span>
+                                <span class="service-name">Tăng Like Instagram</span>
+                                <span class="service-price">500đ</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-lg-6 col-md-8 main-content">
+                <!-- Order Form -->
+                <div class="order-form-container" id="orderFormContainer">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5><i class="fas fa-shopping-cart"></i> Đặt hàng</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="orderForm">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Chọn dịch vụ</label>
+                                            <select class="form-control" id="serviceSelect" required>
+                                                <option value="">-- Chọn dịch vụ --</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Link/URL</label>
+                                            <input type="url" class="form-control" id="serviceLink" placeholder="https://..." required>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Số lượng</label>
+                                            <div class="input-group">
+                                                <input type="number" class="form-control" id="quantity" min="1" required>
+                                                <span class="input-group-text" id="quantityRange"></span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div class="mb-3">
+                                            <label class="form-label">Tổng tiền</label>
+                                            <div class="total-price">
+                                                <span id="totalPrice">0đ</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-3">
+                                    <label class="form-label">Ghi chú (tùy chọn)</label>
+                                    <textarea class="form-control" id="orderNote" rows="3" placeholder="Ghi chú cho đơn hàng..."></textarea>
+                                </div>
+                                
+                                <div class="balance-info mb-3">
+                                    <small class="text-muted">
+                                        <i class="fas fa-wallet"></i> Số dư hiện tại: <strong>2.390.000đ</strong>
+                                    </small>
+                                </div>
+                                
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-success btn-lg">
+                                        <i class="fas fa-check"></i> TẠO ĐƠN
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Profile Section -->
+                <div class="profile-container" id="profileContainer" style="display: none;">
+                    <div class="card">
+                        <div class="card-header">
+                            <ul class="nav nav-tabs card-header-tabs" id="profileTabs">
+                                <li class="nav-item">
+                                    <a class="nav-link active" data-toggle="tab" href="#profileInfo">Thông tin</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#profileOrders">Đơn hàng</a>
+                                </li>
+                                <li class="nav-item">
+                                    <a class="nav-link" data-toggle="tab" href="#profileTransactions">Lịch giao dịch</a>
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="card-body">
+                            <div class="tab-content">
+                                <!-- Profile Info Tab -->
+                                <div class="tab-pane fade show active" id="profileInfo">
+                                    <form id="profileForm">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Email</label>
+                                                    <input type="email" class="form-control" value="dungnv933@gmail.com">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Số điện thoại</label>
+                                                    <input type="tel" class="form-control" value="0999.999.999">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Mật khẩu mới</label>
+                                                    <input type="password" class="form-control" placeholder="Để trống nếu không đổi">
+                                                </div>
+                                            </div>
+                                            <div class="col-md-6">
+                                                <div class="form-group">
+                                                    <label>Xác nhận mật khẩu</label>
+                                                    <input type="password" class="form-control" placeholder="Xác nhận mật khẩu mới">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <button type="submit" class="btn btn-primary">Cập nhật thông tin</button>
+                                    </form>
+                                </div>
+                                
+                                <!-- Orders Tab -->
+                                <div class="tab-pane fade" id="profileOrders">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Dịch vụ</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Giá</th>
+                                                    <th>Trạng thái</th>
+                                                    <th>Ngày tạo</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="ordersTableBody">
+                                                <!-- Orders will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                                
+                                <!-- Transactions Tab -->
+                                <div class="tab-pane fade" id="profileTransactions">
+                                    <div class="table-responsive">
+                                        <table class="table table-striped">
+                                            <thead>
+                                                <tr>
+                                                    <th>ID</th>
+                                                    <th>Loại</th>
+                                                    <th>Số tiền</th>
+                                                    <th>Số dư sau</th>
+                                                    <th>Mô tả</th>
+                                                    <th>Ngày</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody id="transactionsTableBody">
+                                                <!-- Transactions will be loaded here -->
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notes Column -->
+            <div class="col-lg-3 notes-column">
+                <div class="notes-card">
+                    <div class="notes-header">
+                        <h6><i class="fas fa-exclamation-triangle text-warning"></i> LƯU Ý QUAN TRỌNG</h6>
+                    </div>
+                    <div class="notes-content">
+                        <div class="note-section">
+                            <h6><i class="fas fa-info-circle text-primary"></i> Lưu ý khi sử dụng dịch vụ:</h6>
+                            <ul class="note-list">
+                                <li>Link phải ở chế độ công khai, không khóa bình luận</li>
+                                <li>Không đổi link trong quá trình chạy đơn</li>
+                                <li>Hệ thống sẽ tự động kiểm tra và xử lý đơn hàng</li>
+                                <li>Thời gian xử lý: 5-60 phút tùy dịch vụ</li>
+                                <li>Bảo hành: 30 ngày nếu số lượng giảm</li>
+                                <li>Không hoàn tiền nếu link sai hoặc đã chạy</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="note-section">
+                            <h6><i class="fas fa-headset text-success"></i> Hỗ trợ 24/7:</h6>
+                            <ul class="note-list">
+                                <li>Chat: Click nút chat góc dưới phải</li>
+                                <li>Fanpage: fb.com/homemmo</li>
+                                <li>Hotline: 0999.999.999</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="note-section">
+                            <h6><i class="fas fa-lightbulb text-warning"></i> Mẹo tiết kiệm:</h6>
+                            <ul class="note-list">
+                                <li>Nạp từ 500k được tặng 10%</li>
+                                <li>Khách VIP giảm giá 5-10%</li>
+                                <li>Đơn lớn liên hệ admin để được giá tốt hơn</li>
+                            </ul>
+                        </div>
+                        
+                        <div class="note-section">
+                            <h6><i class="fas fa-star text-warning"></i> Dịch vụ chạy tốt nhất:</h6>
+                            <ul class="note-list">
+                                <li>✓ Tăng like Facebook - Nhanh, giá rẻ</li>
+                                <li>✓ Tăng follow TikTok - Thật 100%</li>
+                                <li>✓ Tăng sub Youtube - Bảo hành 30 ngày</li>
+                                <li>✓ Tăng view video - Tăng nhanh trong 1 giờ</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Chat Button -->
+<div class="chat-button">
+    <button class="btn btn-primary btn-circle" onclick="openChat()">
+        <i class="fas fa-comments"></i>
+    </button>
+</div>
+
+<!-- Toast Container -->
+<div class="toast-container position-fixed top-0 end-0 p-3">
+    <div id="toast" class="toast" role="alert">
+        <div class="toast-header">
+            <i class="fas fa-info-circle text-primary me-2"></i>
+            <strong class="me-auto">Thông báo</strong>
+            <button type="button" class="btn-close" data-dismiss="toast"></button>
+        </div>
+        <div class="toast-body" id="toastMessage">
+            <!-- Toast message will be inserted here -->
+        </div>
+    </div>
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- Custom JS -->
+<script src="app.js"></script>
+</body>
+</html>
