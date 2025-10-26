@@ -1,15 +1,9 @@
-// HOMEMMO Admin Dashboard JavaScript
+// HOMEMMO Admin Dashboard - Demo JavaScript
 
 // Global variables
 let currentPage = 'dashboard';
 let charts = {};
 let dataTables = {};
-
-// API Configuration
-const API_CONFIG = {
-    baseURL: '/api',
-    timeout: 10000
-};
 
 // Mock Data
 const MOCK_DATA = {
@@ -58,12 +52,11 @@ const MOCK_DATA = {
 
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing HOMEMMO Admin Dashboard...');
     initializeApp();
 });
 
 function initializeApp() {
-    console.log('Initializing HOMEMMO Admin Dashboard...');
-    
     // Show dashboard by default
     showPage('dashboard');
     
@@ -172,13 +165,35 @@ function toggleSidebar() {
 // Header functions
 function showNotifications() {
     console.log('Showing notifications...');
-    // TODO: Implement notifications modal
-    alert('Notifications feature coming soon!');
+    Swal.fire({
+        title: 'Notifications',
+        text: 'You have 3 new notifications',
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
 }
 
 function toggleAdminDropdown() {
-    console.log('Toggling admin dropdown...');
-    // TODO: Implement admin dropdown
+    const dropdown = document.getElementById('adminDropdown');
+    if (dropdown) {
+        dropdown.classList.toggle('show');
+    }
+}
+
+function logout() {
+    Swal.fire({
+        title: 'Logout',
+        text: 'Are you sure you want to logout?',
+        icon: 'question',
+        showCancelButton: true,
+        confirmButtonText: 'Yes, logout',
+        cancelButtonText: 'Cancel'
+    }).then((result) => {
+        if (result.isConfirmed) {
+            console.log('User logged out');
+            // TODO: Implement logout logic
+        }
+    });
 }
 
 // Data loading functions
@@ -186,27 +201,10 @@ async function loadDashboardData() {
     try {
         console.log('Loading dashboard data...');
         
-        let stats, ordersData, usersData;
-        
-        try {
-            // Try to load from API first
-            const statsResponse = await fetch(`${API_CONFIG.baseURL}/admin/stats`);
-            stats = await statsResponse.json();
-            
-            const ordersResponse = await fetch(`${API_CONFIG.baseURL}/admin/orders?limit=5`);
-            ordersData = await ordersResponse.json();
-            
-            const usersResponse = await fetch(`${API_CONFIG.baseURL}/admin/users?limit=5`);
-            usersData = await usersResponse.json();
-            
-            console.log('Data loaded from API');
-        } catch (apiError) {
-            console.log('API not available, using mock data');
-            // Use mock data if API fails
-            stats = MOCK_DATA.stats;
-            ordersData = { orders: MOCK_DATA.recentOrders };
-            usersData = { users: MOCK_DATA.recentUsers };
-        }
+        // Use mock data for demo
+        const stats = MOCK_DATA.stats;
+        const ordersData = { orders: MOCK_DATA.recentOrders };
+        const usersData = { users: MOCK_DATA.recentUsers };
         
         // Update stats cards
         updateStatsCards(stats);
@@ -296,6 +294,127 @@ function updateRecentUsersTable(users) {
         `;
         tbody.appendChild(row);
     });
+}
+
+// Chart functions
+function initializeCharts(stats) {
+    try {
+        console.log('Initializing charts...');
+        
+        // Check if Chart.js is loaded
+        if (typeof Chart === 'undefined') {
+            console.error('Chart.js not loaded');
+            return;
+        }
+        
+        // Revenue Chart
+        const revenueCtx = document.getElementById('revenueChart');
+        if (revenueCtx) {
+            charts.revenue = new Chart(revenueCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
+                    datasets: [{
+                        label: 'Revenue (VNĐ)',
+                        data: [12000000, 19000000, 15000000, 25000000],
+                        borderColor: 'rgb(79, 70, 229)',
+                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return value.toLocaleString() + '₫';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Order Status Chart
+        const orderStatusCtx = document.getElementById('orderStatusChart');
+        if (orderStatusCtx) {
+            charts.orderStatus = new Chart(orderStatusCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Completed', 'In Progress', 'Pending', 'Failed'],
+                    datasets: [{
+                        data: [45, 25, 20, 10],
+                        backgroundColor: [
+                            'rgb(16, 185, 129)',
+                            'rgb(79, 70, 229)',
+                            'rgb(245, 158, 11)',
+                            'rgb(239, 68, 68)'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+        
+        console.log('Charts initialized successfully');
+    } catch (error) {
+        console.error('Error initializing charts:', error);
+    }
+}
+
+// Data loading functions for other pages
+async function loadUsersData() {
+    try {
+        console.log('Loading users data...');
+        const usersData = { users: MOCK_DATA.users };
+        updateUsersTable(usersData.users || []);
+        console.log('Users data loaded successfully');
+    } catch (error) {
+        console.error('Error loading users data:', error);
+        showError('Failed to load users data');
+    }
+}
+
+async function loadOrdersData() {
+    try {
+        console.log('Loading orders data...');
+        const ordersData = { orders: MOCK_DATA.orders };
+        updateOrdersTable(ordersData.orders || []);
+        console.log('Orders data loaded successfully');
+    } catch (error) {
+        console.error('Error loading orders data:', error);
+        showError('Failed to load orders data');
+    }
+}
+
+async function loadServicesData() {
+    try {
+        console.log('Loading services data...');
+        const servicesData = { services: MOCK_DATA.services };
+        updateServicesTable(servicesData.services || []);
+        console.log('Services data loaded successfully');
+    } catch (error) {
+        console.error('Error loading services data:', error);
+        showError('Failed to load services data');
+    }
 }
 
 // Table update functions
@@ -396,154 +515,7 @@ function updateServicesTable(services) {
     });
 }
 
-// Chart functions
-function initializeCharts(stats) {
-    try {
-        console.log('Initializing charts...');
-        
-        // Check if Chart.js is loaded
-        if (typeof Chart === 'undefined') {
-            console.error('Chart.js not loaded');
-            return;
-        }
-        
-        // Revenue Chart
-        const revenueCtx = document.getElementById('revenueChart');
-        if (revenueCtx) {
-            charts.revenue = new Chart(revenueCtx, {
-                type: 'line',
-                data: {
-                    labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                    datasets: [{
-                        label: 'Revenue (VNĐ)',
-                        data: [12000000, 19000000, 15000000, 25000000],
-                        borderColor: 'rgb(79, 70, 229)',
-                        backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            display: false
-                        }
-                    },
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: function(value) {
-                                    return value.toLocaleString() + '₫';
-                                }
-                            }
-                        }
-                    }
-                }
-            });
-        }
-        
-        // Order Status Chart
-        const orderStatusCtx = document.getElementById('orderStatusChart');
-        if (orderStatusCtx) {
-            charts.orderStatus = new Chart(orderStatusCtx, {
-                type: 'doughnut',
-                data: {
-                    labels: ['Completed', 'In Progress', 'Pending', 'Failed'],
-                    datasets: [{
-                        data: [45, 25, 20, 10],
-                        backgroundColor: [
-                            'rgb(16, 185, 129)',
-                            'rgb(79, 70, 229)',
-                            'rgb(245, 158, 11)',
-                            'rgb(239, 68, 68)'
-                        ]
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: {
-                            position: 'bottom'
-                        }
-                    }
-                }
-            });
-        }
-        
-        console.log('Charts initialized successfully');
-    } catch (error) {
-        console.error('Error initializing charts:', error);
-    }
-}
-
-// Data loading functions for other pages
-async function loadUsersData() {
-    try {
-        console.log('Loading users data...');
-        
-        let usersData;
-        try {
-            const response = await fetch(`${API_CONFIG.baseURL}/admin/users`);
-            usersData = await response.json();
-        } catch (apiError) {
-            console.log('API not available, using mock data for users');
-            usersData = { users: MOCK_DATA.users };
-        }
-        
-        updateUsersTable(usersData.users || []);
-        console.log('Users data loaded successfully');
-    } catch (error) {
-        console.error('Error loading users data:', error);
-        showError('Failed to load users data');
-    }
-}
-
-async function loadOrdersData() {
-    try {
-        console.log('Loading orders data...');
-        
-        let ordersData;
-        try {
-            const response = await fetch(`${API_CONFIG.baseURL}/admin/orders`);
-            ordersData = await response.json();
-        } catch (apiError) {
-            console.log('API not available, using mock data for orders');
-            ordersData = { orders: MOCK_DATA.orders };
-        }
-        
-        updateOrdersTable(ordersData.orders || []);
-        console.log('Orders data loaded successfully');
-    } catch (error) {
-        console.error('Error loading orders data:', error);
-        showError('Failed to load orders data');
-    }
-}
-
-async function loadServicesData() {
-    try {
-        console.log('Loading services data...');
-        
-        let servicesData;
-        try {
-            const response = await fetch(`${API_CONFIG.baseURL}/services`);
-            servicesData = await response.json();
-        } catch (apiError) {
-            console.log('API not available, using mock data for services');
-            servicesData = { services: MOCK_DATA.services };
-        }
-        
-        updateServicesTable(servicesData.services || []);
-        console.log('Services data loaded successfully');
-    } catch (error) {
-        console.error('Error loading services data:', error);
-        showError('Failed to load services data');
-    }
-}
-
+// Placeholder functions for other pages
 async function loadApiProvidersData() {
     console.log('Loading API providers data...');
     // TODO: Implement API providers data loading
@@ -572,6 +544,82 @@ async function loadReportsData() {
 async function loadSettingsData() {
     console.log('Loading settings data...');
     // TODO: Implement settings data loading
+}
+
+// Action functions
+function editUser(userId) {
+    console.log(`Editing user: ${userId}`);
+    Swal.fire({
+        title: 'Edit User',
+        text: `Edit user ${userId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function toggleUserStatus(userId) {
+    console.log(`Toggling user status: ${userId}`);
+    Swal.fire({
+        title: 'Toggle User Status',
+        text: `Toggle user status ${userId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function viewOrder(orderId) {
+    console.log(`Viewing order: ${orderId}`);
+    Swal.fire({
+        title: 'View Order',
+        text: `View order ${orderId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function updateOrderStatus(orderId) {
+    console.log(`Updating order status: ${orderId}`);
+    Swal.fire({
+        title: 'Update Order Status',
+        text: `Update order status ${orderId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function editService(serviceId) {
+    console.log(`Editing service: ${serviceId}`);
+    Swal.fire({
+        title: 'Edit Service',
+        text: `Edit service ${serviceId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function toggleServiceStatus(serviceId) {
+    console.log(`Toggling service status: ${serviceId}`);
+    Swal.fire({
+        title: 'Toggle Service Status',
+        text: `Toggle service status ${serviceId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+// Modal functions
+function showModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.add('show');
+    }
+}
+
+function hideModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.classList.remove('show');
+    }
 }
 
 // Utility functions
@@ -605,51 +653,22 @@ function formatDate(dateString) {
 
 function showError(message) {
     console.error(message);
-    // TODO: Implement error notification system
-    alert(`Error: ${message}`);
+    Swal.fire({
+        title: 'Error',
+        text: message,
+        icon: 'error',
+        confirmButtonText: 'OK'
+    });
 }
 
 function showSuccess(message) {
     console.log(message);
-    // TODO: Implement success notification system
-    alert(`Success: ${message}`);
-}
-
-// Action functions
-function editUser(userId) {
-    console.log(`Editing user: ${userId}`);
-    // TODO: Implement edit user modal
-    alert(`Edit user ${userId} - Feature coming soon!`);
-}
-
-function toggleUserStatus(userId) {
-    console.log(`Toggling user status: ${userId}`);
-    // TODO: Implement toggle user status
-    alert(`Toggle user status ${userId} - Feature coming soon!`);
-}
-
-function viewOrder(orderId) {
-    console.log(`Viewing order: ${orderId}`);
-    // TODO: Implement view order modal
-    alert(`View order ${orderId} - Feature coming soon!`);
-}
-
-function updateOrderStatus(orderId) {
-    console.log(`Updating order status: ${orderId}`);
-    // TODO: Implement update order status
-    alert(`Update order status ${orderId} - Feature coming soon!`);
-}
-
-function editService(serviceId) {
-    console.log(`Editing service: ${serviceId}`);
-    // TODO: Implement edit service modal
-    alert(`Edit service ${serviceId} - Feature coming soon!`);
-}
-
-function toggleServiceStatus(serviceId) {
-    console.log(`Toggling service status: ${serviceId}`);
-    // TODO: Implement toggle service status
-    alert(`Toggle service status ${serviceId} - Feature coming soon!`);
+    Swal.fire({
+        title: 'Success',
+        text: message,
+        icon: 'success',
+        confirmButtonText: 'OK'
+    });
 }
 
 // Export functions for global access
@@ -657,9 +676,12 @@ window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
 window.showNotifications = showNotifications;
 window.toggleAdminDropdown = toggleAdminDropdown;
+window.logout = logout;
 window.editUser = editUser;
 window.toggleUserStatus = toggleUserStatus;
 window.viewOrder = viewOrder;
 window.updateOrderStatus = updateOrderStatus;
 window.editService = editService;
 window.toggleServiceStatus = toggleServiceStatus;
+window.showModal = showModal;
+window.hideModal = hideModal;
