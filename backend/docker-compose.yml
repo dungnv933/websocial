@@ -1,0 +1,47 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:13
+    environment:
+      POSTGRES_DB: smmpanel
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: password
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build: .
+    environment:
+      DATABASE_URL: postgresql://postgres:password@postgres:5432/smmpanel
+      SECRET_KEY: your-secret-key-here
+      BUMX_API_KEY: your-bumx-api-key
+      BUMX_API_URL: https://bumx.vn/api/v1
+      SEPAY_SECRET: your-sepay-secret
+      TELEGRAM_BOT_TOKEN: your-telegram-bot-token
+      TELEGRAM_CHAT_ID: your-chat-id
+      DEBUG: "True"
+      CORS_ORIGINS: http://localhost:3000,https://social.homemmo.store
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: >
+      sh -c "
+        alembic upgrade head &&
+        python run.py
+      "
+
+volumes:
+  postgres_data:
+
