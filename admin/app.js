@@ -66,7 +66,29 @@ function initializeApp() {
     // Setup event listeners
     setupEventListeners();
     
+    // Initialize modals
+    initializeModals();
+    
     console.log('Admin Dashboard initialized successfully');
+}
+
+function initializeModals() {
+    // Close modals when clicking outside
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('modal')) {
+            e.target.classList.remove('show');
+        }
+    });
+    
+    // Close modals with close button
+    document.querySelectorAll('.close').forEach(closeBtn => {
+        closeBtn.addEventListener('click', function() {
+            const modal = this.closest('.modal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+        });
+    });
 }
 
 function setupEventListeners() {
@@ -671,6 +693,70 @@ function showSuccess(message) {
     });
 }
 
+// Add User functions
+function addUser() {
+    console.log('Opening Add User modal...');
+    showModal('addUserModal');
+}
+
+function submitAddUser() {
+    const username = document.getElementById('addUsername').value;
+    const email = document.getElementById('addUserEmail').value;
+    const password = document.getElementById('addUserPassword').value;
+    const balance = document.getElementById('addInitialBalance').value;
+    
+    if (!username || !email || !password) {
+        showError('Please fill in all required fields');
+        return;
+    }
+    
+    console.log('Adding user:', { username, email, balance });
+    
+    // Simulate API call
+    setTimeout(() => {
+        showSuccess('User added successfully!');
+        hideModal('addUserModal');
+        
+        // Clear form
+        document.getElementById('addUsername').value = '';
+        document.getElementById('addUserEmail').value = '';
+        document.getElementById('addUserPassword').value = '';
+        document.getElementById('addInitialBalance').value = '0';
+        
+        // Refresh users table
+        loadUsersData();
+    }, 1000);
+}
+
+function exportUsers() {
+    console.log('Exporting users...');
+    showSuccess('Exporting users to CSV...');
+    // TODO: Implement CSV export
+}
+
+function filterUsers() {
+    const searchTerm = document.getElementById('user-search')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('user-status-filter')?.value || 'all';
+    
+    console.log('Filtering users:', { searchTerm, statusFilter });
+    
+    // Filter users based on search and status
+    let filteredUsers = MOCK_DATA.users;
+    
+    if (searchTerm) {
+        filteredUsers = filteredUsers.filter(user => 
+            user.email.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (statusFilter !== 'all') {
+        const isActive = statusFilter === 'active';
+        filteredUsers = filteredUsers.filter(user => user.is_active === isActive);
+    }
+    
+    updateUsersTable(filteredUsers);
+}
+
 // Export functions for global access
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
@@ -685,3 +771,7 @@ window.editService = editService;
 window.toggleServiceStatus = toggleServiceStatus;
 window.showModal = showModal;
 window.hideModal = hideModal;
+window.addUser = addUser;
+window.submitAddUser = submitAddUser;
+window.exportUsers = exportUsers;
+window.filterUsers = filterUsers;
