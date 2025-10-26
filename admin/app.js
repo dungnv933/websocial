@@ -47,6 +47,23 @@ const MOCK_DATA = {
         { id: 3, name: 'Tăng View YouTube', category: 'YouTube', type: 'Default', rate: 25, min: 100, max: 50000, provider: 'BUMX API', status: 'Active' },
         { id: 4, name: 'Tăng Like Instagram', category: 'Instagram', type: 'Default', rate: 200, min: 50, max: 2000, provider: 'BUMX API', status: 'Active' },
         { id: 5, name: 'Tăng Comment Facebook', category: 'Facebook', type: 'Custom Comments', rate: 300, min: 10, max: 1000, provider: 'BUMX API', status: 'Active' }
+    ],
+    apiProviders: [
+        { id: 1, name: 'BUMX API', url: 'https://bumx-api.com', key: '***', type: 'SMM Panel', status: 'Active', services: 156, last_sync: '2025-10-26T10:30:00Z' },
+        { id: 2, name: 'Provider 2', url: 'https://provider2.com', key: '***', type: 'Custom', status: 'Inactive', services: 0, last_sync: '2025-10-20T15:45:00Z' }
+    ],
+    payments: [
+        { id: 1, user_email: 'dungnv933@gmail.com', type: 'Deposit', amount: 1000000, method: 'VNPay', status: 'Completed', created_at: '2025-10-26T10:30:00Z' },
+        { id: 2, user_email: 'testuser@gmail.com', type: 'Order', amount: 50000, method: 'Balance', status: 'Completed', created_at: '2025-10-25T15:45:00Z' },
+        { id: 3, user_email: 'user123@gmail.com', type: 'Refund', amount: 25000, method: 'Balance', status: 'Pending', created_at: '2025-10-24T09:20:00Z' }
+    ],
+    promotions: [
+        { code: 'WELCOME10', type: 'Percentage', value: 10, min_order: 0, max_uses: 100, used: 25, valid_from: '2025-10-01', valid_to: '2025-12-31', status: 'Active' },
+        { code: 'SAVE20', type: 'Percentage', value: 20, min_order: 100000, max_uses: 50, used: 15, valid_from: '2025-10-15', valid_to: '2025-11-15', status: 'Active' }
+    ],
+    support: [
+        { id: 'TICKET-001', user_email: 'dungnv933@gmail.com', subject: 'Order not completed', status: 'Open', priority: 'High', created_at: '2025-10-26T10:30:00Z' },
+        { id: 'TICKET-002', user_email: 'testuser@gmail.com', subject: 'Payment issue', status: 'Closed', priority: 'Medium', created_at: '2025-10-25T15:45:00Z' }
     ]
 };
 
@@ -541,33 +558,73 @@ function updateServicesTable(services) {
 
 // Placeholder functions for other pages
 async function loadApiProvidersData() {
-    console.log('Loading API providers data...');
-    // TODO: Implement API providers data loading
+    try {
+        console.log('Loading API providers data...');
+        const providersData = { providers: MOCK_DATA.apiProviders };
+        updateApiProvidersTable(providersData.providers || []);
+        console.log('API providers data loaded successfully');
+    } catch (error) {
+        console.error('Error loading API providers data:', error);
+        showError('Failed to load API providers data');
+    }
 }
 
 async function loadPaymentsData() {
-    console.log('Loading payments data...');
-    // TODO: Implement payments data loading
+    try {
+        console.log('Loading payments data...');
+        const paymentsData = { payments: MOCK_DATA.payments };
+        updatePaymentsTable(paymentsData.payments || []);
+        console.log('Payments data loaded successfully');
+    } catch (error) {
+        console.error('Error loading payments data:', error);
+        showError('Failed to load payments data');
+    }
 }
 
 async function loadPromotionsData() {
-    console.log('Loading promotions data...');
-    // TODO: Implement promotions data loading
+    try {
+        console.log('Loading promotions data...');
+        const promotionsData = { promotions: MOCK_DATA.promotions };
+        updatePromotionsTable(promotionsData.promotions || []);
+        console.log('Promotions data loaded successfully');
+    } catch (error) {
+        console.error('Error loading promotions data:', error);
+        showError('Failed to load promotions data');
+    }
 }
 
 async function loadSupportData() {
-    console.log('Loading support data...');
-    // TODO: Implement support data loading
+    try {
+        console.log('Loading support data...');
+        const supportData = { tickets: MOCK_DATA.support };
+        updateSupportTable(supportData.tickets || []);
+        console.log('Support data loaded successfully');
+    } catch (error) {
+        console.error('Error loading support data:', error);
+        showError('Failed to load support data');
+    }
 }
 
 async function loadReportsData() {
-    console.log('Loading reports data...');
-    // TODO: Implement reports data loading
+    try {
+        console.log('Loading reports data...');
+        // Reports page doesn't need table data, just show success
+        console.log('Reports data loaded successfully');
+    } catch (error) {
+        console.error('Error loading reports data:', error);
+        showError('Failed to load reports data');
+    }
 }
 
 async function loadSettingsData() {
-    console.log('Loading settings data...');
-    // TODO: Implement settings data loading
+    try {
+        console.log('Loading settings data...');
+        // Settings page doesn't need table data, just show success
+        console.log('Settings data loaded successfully');
+    } catch (error) {
+        console.error('Error loading settings data:', error);
+        showError('Failed to load settings data');
+    }
 }
 
 // Action functions
@@ -843,6 +900,177 @@ function filterServices() {
     updateServicesTable(filteredServices);
 }
 
+// Table update functions for other pages
+function updateApiProvidersTable(providers) {
+    const tbody = document.querySelector('#providers-table');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (providers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No API providers found</td></tr>';
+        return;
+    }
+    
+    providers.forEach(provider => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${provider.id}</td>
+            <td>${provider.name || 'Unknown'}</td>
+            <td><a href="${provider.url}" target="_blank" class="text-truncate" style="max-width: 150px; display: inline-block;">${provider.url}</a></td>
+            <td>${provider.key || '***'}</td>
+            <td><span class="badge badge-primary">${provider.type || 'Unknown'}</span></td>
+            <td><span class="badge badge-${provider.status === 'Active' ? 'success' : 'danger'}">${provider.status || 'Unknown'}</span></td>
+            <td>${provider.services || 0}</td>
+            <td>${formatDate(provider.last_sync)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editProvider(${provider.id})">Edit</button>
+                <button class="btn btn-sm btn-${provider.status === 'Active' ? 'danger' : 'success'}" onclick="toggleProviderStatus(${provider.id})">
+                    ${provider.status === 'Active' ? 'Deactivate' : 'Activate'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updatePaymentsTable(payments) {
+    const tbody = document.querySelector('#transactions-table');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (payments.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No transactions found</td></tr>';
+        return;
+    }
+    
+    payments.forEach(payment => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${payment.id}</td>
+            <td>${payment.user_email || 'Unknown'}</td>
+            <td><span class="badge badge-${getPaymentTypeClass(payment.type)}">${payment.type || 'Unknown'}</span></td>
+            <td>${payment.amount?.toLocaleString() || '0'}₫</td>
+            <td>${payment.method || 'Unknown'}</td>
+            <td><span class="badge badge-${getStatusClass(payment.status)}">${payment.status || 'Unknown'}</span></td>
+            <td>${formatDate(payment.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="viewTransaction(${payment.id})">View</button>
+                <button class="btn btn-sm btn-${payment.status === 'Pending' ? 'success' : 'warning'}" onclick="updateTransactionStatus(${payment.id})">
+                    ${payment.status === 'Pending' ? 'Process' : 'Update'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updatePromotionsTable(promotions) {
+    const tbody = document.querySelector('#discounts-table');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (promotions.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="10" class="text-center text-muted">No discount codes found</td></tr>';
+        return;
+    }
+    
+    promotions.forEach(promo => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td><strong>${promo.code || 'Unknown'}</strong></td>
+            <td><span class="badge badge-primary">${promo.type || 'Unknown'}</span></td>
+            <td>${promo.value || 0}${promo.type === 'Percentage' ? '%' : '₫'}</td>
+            <td>${promo.min_order?.toLocaleString() || '0'}₫</td>
+            <td>${promo.max_uses || 'Unlimited'}</td>
+            <td>${promo.used || 0}</td>
+            <td>${formatDate(promo.valid_from)}</td>
+            <td>${formatDate(promo.valid_to)}</td>
+            <td><span class="badge badge-${promo.status === 'Active' ? 'success' : 'danger'}">${promo.status || 'Unknown'}</span></td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editPromotion('${promo.code}')">Edit</button>
+                <button class="btn btn-sm btn-${promo.status === 'Active' ? 'danger' : 'success'}" onclick="togglePromotionStatus('${promo.code}')">
+                    ${promo.status === 'Active' ? 'Deactivate' : 'Activate'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateSupportTable(tickets) {
+    const tbody = document.querySelector('#supportTicketsTable tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (tickets.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No support tickets found</td></tr>';
+        return;
+    }
+    
+    tickets.forEach(ticket => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${ticket.id || 'Unknown'}</td>
+            <td>${ticket.user_email || 'Unknown'}</td>
+            <td>${ticket.subject || 'No subject'}</td>
+            <td><span class="badge badge-${getTicketStatusClass(ticket.status)}">${ticket.status || 'Unknown'}</span></td>
+            <td><span class="badge badge-${getPriorityClass(ticket.priority)}">${ticket.priority || 'Unknown'}</span></td>
+            <td>${formatDate(ticket.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="viewTicket('${ticket.id}')">View</button>
+                <button class="btn btn-sm btn-${ticket.status === 'Open' ? 'success' : 'warning'}" onclick="updateTicketStatus('${ticket.id}')">
+                    ${ticket.status === 'Open' ? 'Close' : 'Reopen'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Helper functions for status classes
+function getPaymentTypeClass(type) {
+    switch(type?.toLowerCase()) {
+        case 'deposit':
+            return 'success';
+        case 'order':
+            return 'primary';
+        case 'refund':
+            return 'warning';
+        default:
+            return 'secondary';
+    }
+}
+
+function getTicketStatusClass(status) {
+    switch(status?.toLowerCase()) {
+        case 'open':
+            return 'warning';
+        case 'closed':
+            return 'success';
+        case 'pending':
+            return 'primary';
+        default:
+            return 'secondary';
+    }
+}
+
+function getPriorityClass(priority) {
+    switch(priority?.toLowerCase()) {
+        case 'high':
+            return 'danger';
+        case 'medium':
+            return 'warning';
+        case 'low':
+            return 'success';
+        default:
+            return 'secondary';
+    }
+}
+
 // Export functions for global access
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
@@ -866,3 +1094,94 @@ window.submitAddService = submitAddService;
 window.showImportModal = showImportModal;
 window.syncAllServices = syncAllServices;
 window.filterServices = filterServices;
+
+// Action functions for other pages
+function editProvider(providerId) {
+    console.log(`Editing provider: ${providerId}`);
+    Swal.fire({
+        title: 'Edit Provider',
+        text: `Edit provider ${providerId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function toggleProviderStatus(providerId) {
+    console.log(`Toggling provider status: ${providerId}`);
+    Swal.fire({
+        title: 'Toggle Provider Status',
+        text: `Toggle provider status ${providerId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function viewTransaction(transactionId) {
+    console.log(`Viewing transaction: ${transactionId}`);
+    Swal.fire({
+        title: 'View Transaction',
+        text: `View transaction ${transactionId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function updateTransactionStatus(transactionId) {
+    console.log(`Updating transaction status: ${transactionId}`);
+    Swal.fire({
+        title: 'Update Transaction Status',
+        text: `Update transaction status ${transactionId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function editPromotion(promoCode) {
+    console.log(`Editing promotion: ${promoCode}`);
+    Swal.fire({
+        title: 'Edit Promotion',
+        text: `Edit promotion ${promoCode} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function togglePromotionStatus(promoCode) {
+    console.log(`Toggling promotion status: ${promoCode}`);
+    Swal.fire({
+        title: 'Toggle Promotion Status',
+        text: `Toggle promotion status ${promoCode} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function viewTicket(ticketId) {
+    console.log(`Viewing ticket: ${ticketId}`);
+    Swal.fire({
+        title: 'View Ticket',
+        text: `View ticket ${ticketId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+function updateTicketStatus(ticketId) {
+    console.log(`Updating ticket status: ${ticketId}`);
+    Swal.fire({
+        title: 'Update Ticket Status',
+        text: `Update ticket status ${ticketId} - Feature coming soon!`,
+        icon: 'info',
+        confirmButtonText: 'OK'
+    });
+}
+
+// Export additional functions
+window.editProvider = editProvider;
+window.toggleProviderStatus = toggleProviderStatus;
+window.viewTransaction = viewTransaction;
+window.updateTransactionStatus = updateTransactionStatus;
+window.editPromotion = editPromotion;
+window.togglePromotionStatus = togglePromotionStatus;
+window.viewTicket = viewTicket;
+window.updateTicketStatus = updateTicketStatus;
