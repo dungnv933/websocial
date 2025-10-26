@@ -11,54 +11,8 @@
     <!-- Font Awesome -->
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     
-    <!-- Chart.js - Multiple CDN fallbacks -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js" onerror="loadChartFallback()"></script>
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.min.js" onerror="loadChartFallback2()"></script>
-    <script>
-        function loadChartFallback() {
-            console.log('Primary Chart.js failed, loading fallback...');
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-            script.onload = function() {
-                console.log('Chart.js loaded from fallback CDN');
-                // Re-initialize charts after fallback loads
-                setTimeout(() => {
-                    if (typeof initializeCharts === 'function') {
-                        initializeCharts();
-                    }
-                }, 100);
-            };
-            script.onerror = function() {
-                console.error('All Chart.js CDNs failed');
-                // Show static content instead of charts
-                document.querySelectorAll('.chart-container').forEach(container => {
-                    container.innerHTML = '<div class="alert alert-info">Charts temporarily unavailable</div>';
-                });
-            };
-            document.head.appendChild(script);
-        }
-        
-        function loadChartFallback2() {
-            console.log('Secondary Chart.js failed, loading final fallback...');
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-            script.onload = function() {
-                console.log('Chart.js loaded from final fallback CDN');
-                setTimeout(() => {
-                    if (typeof initializeCharts === 'function') {
-                        initializeCharts();
-                    }
-                }, 100);
-            };
-            script.onerror = function() {
-                console.error('All Chart.js CDNs failed');
-                document.querySelectorAll('.chart-container').forEach(container => {
-                    container.innerHTML = '<div class="alert alert-info">Charts temporarily unavailable</div>';
-                });
-            };
-            document.head.appendChild(script);
-        }
-    </script>
+    <!-- Chart.js - Simple and reliable -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
     
     <!-- DataTables -->
     <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
@@ -957,7 +911,11 @@
             setupEventListeners();
             loadDashboardData();
             startAutoRefresh();
-            initializeCharts();
+            
+            // Initialize charts with delay to ensure Chart.js is loaded
+            setTimeout(() => {
+                initializeCharts();
+            }, 500);
         }
 
         function setupEventListeners() {
@@ -1319,6 +1277,15 @@
         function initializeCharts() {
             try {
                 console.log('Initializing charts...');
+                
+                // Check if Chart.js is loaded
+                if (typeof Chart === 'undefined') {
+                    console.error('Chart.js not loaded');
+                    document.querySelectorAll('.chart-container').forEach(container => {
+                        container.innerHTML = '<div class="alert alert-warning">Chart.js đang tải...</div>';
+                    });
+                    return;
+                }
                 
                 // Revenue Chart
                 const revenueCtx = document.getElementById('revenueChart');
