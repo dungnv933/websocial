@@ -3,751 +3,934 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOMEMMO Admin Dashboard</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
-    
-    <style>
-        :root {
-            --primary-color: #4f46e5;
-            --secondary-color: #06b6d4;
-            --success-color: #10b981;
-            --warning-color: #f59e0b;
-            --danger-color: #ef4444;
-            --dark-color: #1f2937;
-            --light-color: #f8fafc;
-        }
-
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-            background-color: var(--light-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: 250px;
-            background: linear-gradient(180deg, #4f46e5 0%, #06b6d4 100%);
-            color: white;
-            z-index: 1000;
-            transition: all 0.3s ease;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem 1rem;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .sidebar-header h3 {
-            margin: 0;
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-menu li {
-            margin: 0;
-        }
-
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 1rem 1.5rem;
-            color: rgba(255,255,255,0.8);
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background-color: rgba(255,255,255,0.1);
-            color: white;
-            border-left-color: white;
-        }
-
-        .sidebar-menu a i {
-            margin-right: 0.75rem;
-            width: 20px;
-            text-align: center;
-        }
-
-        .main-content {
-            margin-left: 250px;
-            min-height: 100vh;
-            transition: all 0.3s ease;
-        }
-
-        .topbar {
-            background: white;
-            padding: 1rem 2rem;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .topbar-left {
-            display: flex;
-            align-items: center;
-        }
-
-        .topbar-right {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-        }
-
-        .content {
-            padding: 2rem;
-        }
-
-        .page-title {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--dark-color);
-            margin-bottom: 0.5rem;
-        }
-
-        .breadcrumb {
-            background: none;
-            padding: 0;
-            margin-bottom: 2rem;
-        }
-
-        .breadcrumb-item a {
-            color: var(--primary-color);
-            text-decoration: none;
-        }
-
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .stats-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-            border-left: 4px solid;
-            transition: transform 0.2s ease;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-2px);
-        }
-
-        .stats-card.users { border-left-color: var(--primary-color); }
-        .stats-card.orders { border-left-color: var(--success-color); }
-        .stats-card.revenue { border-left-color: var(--warning-color); }
-        .stats-card.services { border-left-color: var(--secondary-color); }
-
-        .stats-icon {
-            width: 60px;
-            height: 60px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            margin-bottom: 1rem;
-        }
-
-        .stats-icon.users { background-color: rgba(79, 70, 229, 0.1); color: var(--primary-color); }
-        .stats-icon.orders { background-color: rgba(16, 185, 129, 0.1); color: var(--success-color); }
-        .stats-icon.revenue { background-color: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
-        .stats-icon.services { background-color: rgba(6, 182, 212, 0.1); color: var(--secondary-color); }
-
-        .stats-number {
-            font-size: 2rem;
-            font-weight: 700;
-            color: var(--dark-color);
-            margin-bottom: 0.25rem;
-        }
-
-        .stats-label {
-            color: #6b7280;
-            font-size: 0.875rem;
-            font-weight: 500;
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-
-        .chart-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .chart-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 1rem;
-        }
-
-        .chart-container {
-            position: relative;
-            height: 300px;
-        }
-
-        .tables-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1.5rem;
-        }
-
-        .table-card {
-            background: white;
-            padding: 1.5rem;
-            border-radius: 12px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        .table-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-            color: var(--dark-color);
-            margin-bottom: 1rem;
-        }
-
-        .table {
-            margin-bottom: 0;
-        }
-
-        .table th {
-            border-top: none;
-            font-weight: 600;
-            color: var(--dark-color);
-            font-size: 0.875rem;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-        }
-
-        .table td {
-            vertical-align: middle;
-            font-size: 0.875rem;
-        }
-
-        .badge {
-            font-size: 0.75rem;
-            padding: 0.375rem 0.75rem;
-        }
-
-        .notification-badge {
-            position: relative;
-        }
-
-        .notification-badge::after {
-            content: '3';
-            position: absolute;
-            top: -8px;
-            right: -8px;
-            background: var(--danger-color);
-            color: white;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            font-size: 0.75rem;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .charts-grid,
-            .tables-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-    </style>
+    <title>HOMEMMO - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar">
-        <div class="sidebar-header">
-            <h3><i class="fas fa-chart-line"></i> SMM Panel</h3>
+
+<!-- Top Header -->
+<header class="top-header">
+    <div class="header-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="site-name">HOMEMMO Admin</h1>
+    </div>
+    <div class="header-right">
+        <div class="notification-icon" onclick="showNotifications()">
+            <i class="fas fa-bell"></i>
+            <span class="badge">3</span>
         </div>
-        <ul class="sidebar-menu">
-            <li><a href="#dashboard" class="nav-link active" data-section="dashboard">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Dashboard</span>
-            </a></li>
-            <li><a href="#users" class="nav-link" data-section="users">
-                <i class="fas fa-users"></i>
-                <span>Users</span>
-            </a></li>
-            <li><a href="#orders" class="nav-link" data-section="orders">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Orders</span>
-            </a></li>
-            <li><a href="#services" class="nav-link" data-section="services">
-                <i class="fas fa-list"></i>
-                <span>Services</span>
-            </a></li>
-            <li><a href="#api-providers" class="nav-link" data-section="api-providers">
-                <i class="fas fa-plug"></i>
-                <span>API Providers</span>
-            </a></li>
-            <li><a href="#payments" class="nav-link" data-section="payments">
-                <i class="fas fa-credit-card"></i>
-                <span>Payments</span>
-            </a></li>
-            <li><a href="#promotions" class="nav-link" data-section="promotions">
-                <i class="fas fa-tags"></i>
-                <span>Promotions</span>
-            </a></li>
-            <li><a href="#support" class="nav-link" data-section="support">
-                <i class="fas fa-headset"></i>
-                <span>Support</span>
-            </a></li>
-            <li><a href="#reports" class="nav-link" data-section="reports">
-                <i class="fas fa-chart-bar"></i>
-                <span>Reports</span>
-            </a></li>
-            <li><a href="#settings" class="nav-link" data-section="settings">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a></li>
-        </ul>
-        </div>
-        
-    <!-- Main Content -->
-    <div class="main-content">
-        <!-- Topbar -->
-        <div class="topbar">
-            <div class="topbar-left">
-                <button class="btn btn-outline-secondary me-3" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
+        <div class="admin-info">
+            <span class="admin-name">Admin</span>
+            <div class="dropdown">
+                <button class="btn-admin-dropdown" onclick="toggleAdminDropdown()">
+                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-chevron-down"></i>
                 </button>
-                <h4 class="mb-0" id="pageTitle">Dashboard</h4>
-            </div>
-            <div class="topbar-right">
-                <button class="btn btn-outline-secondary me-2" id="darkModeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <div class="notification-badge">
-                    <i class="fas fa-bell"></i>
-            </div>
-                <div class="dropdown">
-                    <button class="btn btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> Admin
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-cog"></i> Settings</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
-            </div>
-            </div>
-        </div>
-        
-        <!-- Content -->
-        <div class="content">
-            <!-- Dashboard Section -->
-            <div id="dashboard-section" class="content-section">
-                <h1 class="page-title">Dashboard</h1>
-                <nav aria-label="breadcrumb">
-                    <ol class="breadcrumb">
-                        <li class="breadcrumb-item"><a href="#">Home</a></li>
-                        <li class="breadcrumb-item active" aria-current="page">Dashboard</li>
-                    </ol>
-                </nav>
-
-                <!-- Stats Cards -->
-                <div class="stats-grid">
-                    <div class="stats-card users">
-                        <div class="stats-icon users">
-                            <i class="fas fa-users"></i>
-                        </div>
-                        <div class="stats-number" id="totalUsers">1.234</div>
-                        <div class="stats-label">Total Users</div>
-                    </div>
-                    <div class="stats-card orders">
-                        <div class="stats-icon orders">
-                            <i class="fas fa-shopping-cart"></i>
-                        </div>
-                        <div class="stats-number" id="totalOrders">5.678</div>
-                        <div class="stats-label">Total Orders</div>
-                    </div>
-                    <div class="stats-card revenue">
-                        <div class="stats-icon revenue">
-                            <i class="fas fa-dollar-sign"></i>
-                        </div>
-                        <div class="stats-number" id="totalRevenue">123.456.789₫</div>
-                        <div class="stats-label">Total Revenue</div>
-                    </div>
-                    <div class="stats-card services">
-                        <div class="stats-icon services">
-                            <i class="fas fa-list"></i>
-                        </div>
-                        <div class="stats-number" id="activeServices">156</div>
-                        <div class="stats-label">Active Services</div>
-            </div>
-                </div>
-
-                <!-- Charts -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <h3 class="chart-title">Revenue Last 30 Days</h3>
-                        <div class="chart-container">
-                            <canvas id="revenueChart"></canvas>
-                        </div>
-                    </div>
-                    <div class="chart-card">
-                        <h3 class="chart-title">Order Status Distribution</h3>
-                        <div class="chart-container">
-                            <canvas id="orderStatusChart"></canvas>
-                        </div>
-            </div>
-                </div>
-
-                <!-- Tables -->
-                <div class="tables-grid">
-                    <div class="table-card">
-                        <h3 class="table-title">Recent Orders</h3>
-                        <div class="table-responsive">
-                            <table class="table">
-                    <thead>
-                        <tr>
-                                        <th>Order ID</th>
-                                        <th>User</th>
-                                        <th>Service</th>
-                                        <th>Amount</th>
-                                        <th>Status</th>
-                        </tr>
-                    </thead>
-                                <tbody id="recentOrdersTable">
-                                    <tr>
-                                        <td>ORD-001</td>
-                                        <td>dungnv933</td>
-                                        <td>Tăng Like Facebook</td>
-                                        <td>2.500₫</td>
-                                        <td><span class="badge bg-success">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>ORD-002</td>
-                                        <td>testuser</td>
-                                        <td>Tăng Follow TikTok</td>
-                                        <td>50.000₫</td>
-                                        <td><span class="badge bg-primary">In Progress</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>ORD-003</td>
-                                        <td>user123</td>
-                                        <td>Tăng View YouTube</td>
-                                        <td>25.000₫</td>
-                                        <td><span class="badge bg-success">Completed</span></td>
-                                    </tr>
-                                    <tr>
-                                        <td>ORD-004</td>
-                                        <td>vipuser</td>
-                                        <td>Tăng Like Instagram</td>
-                                        <td>40.000₫</td>
-                                        <td><span class="badge bg-warning">Pending</span></td>
-                                    </tr>
-                    </tbody>
-                </table>
-            </div>
-                </div>
-                    <div class="table-card">
-                        <h3 class="table-title">Recent Users</h3>
-                        <div class="table-responsive">
-                            <table class="table">
-                    <thead>
-                        <tr>
-                                        <th>Username</th>
-                                        <th>Email</th>
-                                        <th>Balance</th>
-                                        <th>Registered</th>
-                        </tr>
-                    </thead>
-                                <tbody id="recentUsersTable">
-                                    <tr>
-                                        <td>dungnv933</td>
-                                        <td>user1@example.com</td>
-                                        <td>2.390₫</td>
-                                        <td>2025-10-20</td>
-                                    </tr>
-                                    <tr>
-                                        <td>testuser</td>
-                                        <td>test@example.com</td>
-                                        <td>0₫</td>
-                                        <td>2025-10-19</td>
-                                    </tr>
-                                    <tr>
-                                        <td>user123</td>
-                                        <td>user123@example.com</td>
-                                        <td>15.000₫</td>
-                                        <td>2025-10-18</td>
-                                    </tr>
-                                    <tr>
-                                        <td>vipuser</td>
-                                        <td>vip@example.com</td>
-                                        <td>50.000₫</td>
-                                        <td>2025-10-15</td>
-                                    </tr>
-                    </tbody>
-                </table>
-            </div>
-                    </div>
+                <div class="admin-dropdown-menu" id="adminDropdown">
+                    <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
                 </div>
             </div>
         </div>
     </div>
+</header>
 
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<div class="main-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" onclick="showPage('dashboard'); return false;">
+                <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('users'); return false;">
+                <i class="fas fa-users"></i> <span>Users</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('orders'); return false;">
+                <i class="fas fa-shopping-cart"></i> <span>Orders</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('services'); return false;">
+                <i class="fas fa-list"></i> <span>Services</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('providers'); return false;">
+                <i class="fas fa-plug"></i> <span>API Providers</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('payments'); return false;">
+                <i class="fas fa-money-bill-wave"></i> <span>Payments</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('promotions'); return false;">
+                <i class="fas fa-tag"></i> <span>Promotions</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('support'); return false;">
+                <i class="fas fa-headset"></i> <span>Support</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('reports'); return false;">
+                <i class="fas fa-chart-bar"></i> <span>Reports</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('settings'); return false;">
+                <i class="fas fa-cog"></i> <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
 
-    <script>
-        // Global variables
-        let charts = {};
-        let currentSection = 'dashboard';
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div class="page-content" id="page-dashboard">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <div class="breadcrumb">Home / Dashboard</div>
+            </div>
 
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeApp();
-        });
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-users">1,234</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-green">
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-orders">5,678</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-revenue">123,456,789đ</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon"><i class="fas fa-list"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-services">156</div>
+                        <div class="stat-label">Active Services</div>
+                    </div>
+                </div>
+            </div>
 
-        function initializeApp() {
-            setupEventListeners();
-            loadDashboardData();
-            initializeCharts();
-        }
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h5>Revenue Last 30 Days</h5>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h5>Order Status Distribution</h5>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
 
-        function setupEventListeners() {
-            // Sidebar navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    showSection(section);
-                });
-            });
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <div class="activity-section">
+                    <h5>Recent Orders</h5>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>User</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-orders">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="activity-section">
+                    <h5>Recent Users</h5>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-users">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-            // Sidebar toggle
-            document.getElementById('sidebarToggle').addEventListener('click', function() {
-                document.querySelector('.sidebar').classList.toggle('collapsed');
-                document.querySelector('.main-content').classList.toggle('collapsed');
-            });
+        <!-- Users Page -->
+        <div class="page-content" id="page-users" style="display: none;">
+            <div class="page-header">
+                <h2>Users Management</h2>
+                <div class="breadcrumb">Home / Users</div>
+            </div>
 
-            // Dark mode toggle
-            document.getElementById('darkModeToggle').addEventListener('click', function() {
-                document.body.classList.toggle('dark-mode');
-                const icon = this.querySelector('i');
-                icon.classList.toggle('fa-moon');
-                icon.classList.toggle('fa-sun');
-            });
-        }
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-actions">
+                        <button class="btn btn-primary" onclick="showAddUserModal()"><i class="fas fa-plus"></i> Add User</button>
+                        <button class="btn btn-secondary" onclick="exportUsers()"><i class="fas fa-download"></i> Export CSV</button>
+                    </div>
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Search username/email..." id="user-search" onkeyup="filterUsers()">
+                        <select class="form-control" id="user-status-filter" onchange="filterUsers()">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="banned">Banned</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Total Spent</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-        function showSection(section) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(section => {
-                section.style.display = 'none';
-            });
+        <!-- Orders Page -->
+        <div class="page-content" id="page-orders" style="display: none;">
+            <div class="page-header">
+                <h2>Orders Management</h2>
+                <div class="breadcrumb">Home / Orders</div>
+            </div>
 
-            // Show selected section
-            document.getElementById(`${section}-section`).style.display = 'block';
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Search order ID/link..." id="order-search" onkeyup="filterOrders()">
+                        <select class="form-control" id="order-status-filter" onchange="filterOrders()">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>User</th>
+                                <th>Service</th>
+                                <th>Link</th>
+                                <th>Quantity</th>
+                                <th>Charge</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            document.querySelector(`[data-section="${section}"]`).classList.add('active');
+        <!-- Services Page -->
+        <div class="page-content" id="page-services" style="display: none;">
+            <div class="page-header">
+                <h2>Services Management</h2>
+                <div class="breadcrumb">Home / Services</div>
+            </div>
 
-            // Update page title
-            const titles = {
-                dashboard: 'Dashboard',
-                users: 'Users Management',
-                orders: 'Orders Management',
-                services: 'Services',
-                'api-providers': 'API Providers',
-                payments: 'Payments',
-                promotions: 'Promotions',
-                support: 'Support',
-                reports: 'Reports',
-                settings: 'Settings'
-            };
-            document.getElementById('pageTitle').textContent = titles[section];
-            currentSection = section;
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-actions">
+                        <button class="btn btn-primary" onclick="showAddServiceModal()"><i class="fas fa-plus"></i> Add Service</button>
+                        <button class="btn btn-info" onclick="showImportModal()"><i class="fas fa-download"></i> Import from API</button>
+                        <button class="btn btn-success" onclick="syncAllServices()"><i class="fas fa-sync"></i> Sync All</button>
+                    </div>
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Search service..." id="service-search" onkeyup="filterServices()">
+                        <select class="form-control" id="service-category-filter" onchange="filterServices()">
+                            <option value="">All Categories</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Shopee">Shopee</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Service Name</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Rate</th>
+                                <th>Min/Max</th>
+                                <th>Provider</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-            // Load section-specific data
-            switch(section) {
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-                case 'users':
-                    loadUsersData();
-                    break;
-                case 'orders':
-                    loadOrdersData();
-                    break;
-                case 'services':
-                    loadServicesData();
-                    break;
-            }
-        }
-        
-        // Data loading functions
-        async function loadDashboardData() {
-            try {
-                console.log('Loading dashboard data...');
-                
-                // Load stats
-                const statsResponse = await fetch('/api/admin/stats');
-                const stats = await statsResponse.json();
-                
-                // Update stats cards
-                document.getElementById('totalUsers').textContent = stats.totalUsers.toLocaleString();
-                document.getElementById('totalOrders').textContent = stats.totalOrders.toLocaleString();
-                document.getElementById('totalRevenue').textContent = stats.totalRevenue.toLocaleString() + '₫';
-                document.getElementById('activeServices').textContent = stats.activeServices || '156';
+        <!-- API Providers Page -->
+        <div class="page-content" id="page-providers" style="display: none;">
+            <div class="page-header">
+                <h2>API Providers</h2>
+                <div class="breadcrumb">Home / API Providers</div>
+            </div>
 
-                // Update charts
-                updateCharts(stats);
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-primary" onclick="showAddProviderModal()"><i class="fas fa-plus"></i> Add Provider</button>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Provider Name</th>
+                                <th>API URL</th>
+                                <th>API Key</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Services</th>
+                                <th>Last Sync</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="providers-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-                console.log('Dashboard data loaded successfully');
-            } catch (error) {
-                console.error('Error loading dashboard data:', error);
-            }
-        }
+        <!-- Payments Page -->
+        <div class="page-content" id="page-payments" style="display: none;">
+            <div class="page-header">
+                <h2>Payments &amp; Transactions</h2>
+                <div class="breadcrumb">Home / Payments</div>
+            </div>
 
-        function initializeCharts() {
-            try {
-                console.log('Initializing charts...');
-                
-                // Check if Chart.js is loaded
-                if (typeof Chart === 'undefined') {
-                    console.error('Chart.js not loaded');
-                    return;
-                }
-                
-                // Revenue Chart
-                const revenueCtx = document.getElementById('revenueChart');
-                if (revenueCtx) {
-                    charts.revenue = new Chart(revenueCtx, {
-                        type: 'line',
-                        data: {
-                            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-                            datasets: [{
-                                label: 'Revenue (VNĐ)',
-                                data: [12000000, 19000000, 15000000, 25000000],
-                                borderColor: 'rgb(79, 70, 229)',
-                                backgroundColor: 'rgba(79, 70, 229, 0.1)',
-                                tension: 0.4,
-                                fill: true
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    display: false
-                                }
-                            },
-                            scales: {
-                                y: {
-                                    beginAtZero: true,
-                                    ticks: {
-                                        callback: function(value) {
-                                            return value.toLocaleString() + '₫';
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    });
-                }
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-filters">
+                        <select class="form-control" id="transaction-type-filter" onchange="filterTransactions()">
+                            <option value="">All Types</option>
+                            <option value="Deposit">Deposit</option>
+                            <option value="Order">Order</option>
+                            <option value="Refund">Refund</option>
+                        </select>
+                        <select class="form-control" id="transaction-status-filter" onchange="filterTransactions()">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-                // Order Status Chart
-                const orderStatusCtx = document.getElementById('orderStatusChart');
-                if (orderStatusCtx) {
-                    charts.orderStatus = new Chart(orderStatusCtx, {
-                        type: 'doughnut',
-                        data: {
-                            labels: ['Completed', 'In Progress', 'Pending', 'Failed'],
-                            datasets: [{
-                                data: [45, 25, 20, 10],
-                                backgroundColor: [
-                                    'rgb(16, 185, 129)',
-                                    'rgb(79, 70, 229)',
-                                    'rgb(245, 158, 11)',
-                                    'rgb(239, 68, 68)'
-                                ]
-                            }]
-                        },
-                        options: {
-                            responsive: true,
-                            maintainAspectRatio: false,
-                            plugins: {
-                                legend: {
-                                    position: 'bottom'
-                                }
-                            }
-                        }
-                    });
-                }
+        <!-- Promotions Page -->
+        <div class="page-content" id="page-promotions" style="display: none;">
+            <div class="page-header">
+                <h2>Promotions Management</h2>
+                <div class="breadcrumb">Home / Promotions</div>
+            </div>
 
-                console.log('Charts initialized successfully');
-            } catch (error) {
-                console.error('Error initializing charts:', error);
-            }
-        }
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-primary" onclick="showAddDiscountModal()"><i class="fas fa-plus"></i> Add Discount Code</button>
+                </div>
+                <div class="card-body">
+                    <h5>Discount Codes</h5>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Min Order</th>
+                                <th>Max Uses</th>
+                                <th>Used</th>
+                                <th>Valid From</th>
+                                <th>Valid To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="discounts-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
 
-        function updateCharts(stats) {
-            // Update charts with real data if needed
-            if (charts.revenue && charts.orderStatus) {
-                console.log('Charts updated with stats:', stats);
-            }
-        }
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Bonus Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="bonus-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>First Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="10" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>100K Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="5" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>500K Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="8" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>1M Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="10" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
 
-        // Placeholder functions for other sections
-        function loadUsersData() {
-            console.log('Loading users data...');
-        }
+        <!-- Support Page -->
+        <div class="page-content" id="page-support" style="display: none;">
+            <div class="page-header">
+                <h2>Support Tickets</h2>
+                <div class="breadcrumb">Home / Support</div>
+            </div>
 
-        function loadOrdersData() {
-            console.log('Loading orders data...');
-        }
+            <div class="card">
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>User</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#001</td>
+                                <td>dungnv933</td>
+                                <td>Cannot place order</td>
+                                <td><span class="badge badge-warning">Open</span></td>
+                                <td><span class="badge badge-danger">High</span></td>
+                                <td>2025-10-26 10:00</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="viewTicket(1)"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-success" onclick="replyTicket(1)"><i class="fas fa-reply"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
 
-        function loadServicesData() {
-            console.log('Loading services data...');
-        }
-    </script>
+        <!-- Reports Page -->
+        <div class="page-content" id="page-reports" style="display: none;">
+            <div class="page-header">
+                <h2>Reports &amp; Analytics</h2>
+                <div class="breadcrumb">Home / Reports</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Revenue Report</h5>
+                    <div class="table-filters">
+                        <input type="date" class="form-control" id="report-date-from">
+                        <input type="date" class="form-control" id="report-date-to">
+                        <button class="btn btn-primary" onclick="generateReport()"><i class="fas fa-chart-line"></i> Generate</button>
+                        <button class="btn btn-secondary" onclick="exportReport()"><i class="fas fa-download"></i> Export CSV</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-card stat-blue">
+                            <div class="stat-details">
+                                <div class="stat-label">Total Revenue</div>
+                                <div class="stat-value">123,456,789đ</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-green">
+                            <div class="stat-details">
+                                <div class="stat-label">Total Orders</div>
+                                <div class="stat-value">5,678</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-orange">
+                            <div class="stat-details">
+                                <div class="stat-label">Average Order</div>
+                                <div class="stat-value">21,756đ</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-purple">
+                            <div class="stat-details">
+                                <div class="stat-label">Profit Margin</div>
+                                <div class="stat-value">35%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container mt-4">
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div class="page-content" id="page-settings" style="display: none;">
+            <div class="page-header">
+                <h2>Settings</h2>
+                <div class="breadcrumb">Home / Settings</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>General Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="general-settings-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Website Name</label>
+                                    <input type="text" class="form-control" value="HOMEMMO">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Website URL</label>
+                                    <input type="text" class="form-control" value="https://homemmo.com">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Timezone</label>
+                                    <select class="form-control">
+                                        <option>Asia/Ho_Chi_Minh</option>
+                                        <option>Asia/Bangkok</option>
+                                        <option>UTC</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Currency</label>
+                                    <select class="form-control">
+                                        <option>VND (đ)</option>
+                                        <option>USD ($)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="registration-enabled" checked>
+                                    <label class="form-check-label" for="registration-enabled">Allow User Registration</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="maintenance-mode">
+                                    <label class="form-check-label" for="maintenance-mode">Maintenance Mode</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-save"></i> Save Settings</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Payment Gateway Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="payment-gateway">
+                        <div class="gateway-header">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="vnpay-enabled" checked>
+                                <label class="form-check-label" for="vnpay-enabled"><strong>VNPay</strong></label>
+                            </div>
+                        </div>
+                        <div class="gateway-config">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>API Key</label>
+                                        <input type="text" class="form-control" placeholder="Enter VNPay API Key">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Secret Key</label>
+                                        <input type="password" class="form-control" placeholder="Enter Secret Key">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-gateway mt-3">
+                        <div class="gateway-header">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="momo-enabled" checked>
+                                <label class="form-check-label" for="momo-enabled"><strong>Momo</strong></label>
+                            </div>
+                        </div>
+                        <div class="gateway-config">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Partner Code</label>
+                                        <input type="text" class="form-control" placeholder="Enter Momo Partner Code">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Access Key</label>
+                                        <input type="password" class="form-control" placeholder="Enter Access Key">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3"><i class="fas fa-save"></i> Save Gateway Settings</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modals -->
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-user-form">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Balance</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addUser()">Add User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Service</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-service-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Service Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="Shopee">Shopee</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="form-control" required>
+                                    <option value="Default">Default</option>
+                                    <option value="Package">Package</option>
+                                    <option value="Custom Comments">Custom Comments</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>API Provider</label>
+                                <select class="form-control" required>
+                                    <option value="1">BUMX API</option>
+                                    <option value="2">Provider 2</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Rate (per 1000)</label>
+                                <input type="number" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Min Quantity</label>
+                                <input type="number" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Max Quantity</label>
+                                <input type="number" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="service-active" checked>
+                                <label class="form-check-label" for="service-active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addService()">Add Service</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Provider Modal -->
+<div class="modal fade" id="addProviderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add API Provider</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-provider-form">
+                    <div class="form-group">
+                        <label>Provider Name</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>API URL</label>
+                        <input type="text" class="form-control" placeholder="https://api.example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-control">
+                            <option>SMM Panel</option>
+                            <option>Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority (1-10)</label>
+                        <input type="number" class="form-control" value="5" min="1" max="10">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="testConnection()"><i class="fas fa-plug"></i> Test Connection</button>
+                <button type="button" class="btn btn-primary" onclick="addProvider()">Add Provider</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Discount Modal -->
+<div class="modal fade" id="addDiscountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Discount Code</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-discount-form">
+                    <div class="form-group">
+                        <label>Discount Code</label>
+                        <input type="text" class="form-control" placeholder="e.g., SALE20" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-control" required>
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Value</label>
+                        <input type="number" class="form-control" placeholder="e.g., 20" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Min Order Amount</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Uses (0 = unlimited)</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Valid From</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Valid To</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addDiscount()">Add Discount</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Services Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Services from API</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Provider</label>
+                    <select class="form-control" id="import-provider">
+                        <option value="1">BUMX API</option>
+                        <option value="2">Provider 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Markup Percentage (%)</label>
+                    <input type="number" class="form-control" id="import-markup" value="20" min="0" max="1000">
+                    <small class="form-text text-muted">Price will be multiplied by (1 + markup/100)</small>
+                </div>
+                <button type="button" class="btn btn-info" onclick="fetchProviderServices()"><i class="fas fa-download"></i> Fetch Services</button>
+                <div id="import-preview" class="mt-3" style="display: none;">
+                    <h6>Preview (50 services found)</h6>
+                    <div class="alert alert-info">Services will be imported with 20% markup</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="importServices()"><i class="fas fa-file-import"></i> Import Selected</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="app.js"></script>
+
 </body>
 </html>
