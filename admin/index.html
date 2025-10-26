@@ -1,0 +1,936 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HOMEMMO - Admin Dashboard</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- Top Header -->
+<header class="top-header">
+    <div class="header-left">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        <h1 class="site-name">HOMEMMO Admin</h1>
+    </div>
+    <div class="header-right">
+        <div class="notification-icon" onclick="showNotifications()">
+            <i class="fas fa-bell"></i>
+            <span class="badge">3</span>
+        </div>
+        <div class="admin-info">
+            <span class="admin-name">Admin</span>
+            <div class="dropdown">
+                <button class="btn-admin-dropdown" onclick="toggleAdminDropdown()">
+                    <i class="fas fa-user-circle"></i>
+                    <i class="fas fa-chevron-down"></i>
+                </button>
+                <div class="admin-dropdown-menu" id="adminDropdown">
+                    <a href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<div class="main-wrapper">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" onclick="showPage('dashboard'); return false;">
+                <i class="fas fa-chart-line"></i> <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('users'); return false;">
+                <i class="fas fa-users"></i> <span>Users</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('orders'); return false;">
+                <i class="fas fa-shopping-cart"></i> <span>Orders</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('services'); return false;">
+                <i class="fas fa-list"></i> <span>Services</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('providers'); return false;">
+                <i class="fas fa-plug"></i> <span>API Providers</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('payments'); return false;">
+                <i class="fas fa-money-bill-wave"></i> <span>Payments</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('promotions'); return false;">
+                <i class="fas fa-tag"></i> <span>Promotions</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('support'); return false;">
+                <i class="fas fa-headset"></i> <span>Support</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('reports'); return false;">
+                <i class="fas fa-chart-bar"></i> <span>Reports</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('settings'); return false;">
+                <i class="fas fa-cog"></i> <span>Settings</span>
+            </a>
+        </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Page -->
+        <div class="page-content" id="page-dashboard">
+            <div class="page-header">
+                <h2>Dashboard</h2>
+                <div class="breadcrumb">Home / Dashboard</div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card stat-blue">
+                    <div class="stat-icon"><i class="fas fa-users"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-users">1,234</div>
+                        <div class="stat-label">Total Users</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-green">
+                    <div class="stat-icon"><i class="fas fa-shopping-cart"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-orders">5,678</div>
+                        <div class="stat-label">Total Orders</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-orange">
+                    <div class="stat-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-revenue">123,456,789đ</div>
+                        <div class="stat-label">Total Revenue</div>
+                    </div>
+                </div>
+                <div class="stat-card stat-purple">
+                    <div class="stat-icon"><i class="fas fa-list"></i></div>
+                    <div class="stat-details">
+                        <div class="stat-value" id="stat-services">156</div>
+                        <div class="stat-label">Active Services</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="charts-grid">
+                <div class="chart-card">
+                    <h5>Revenue Last 30 Days</h5>
+                    <div class="chart-container">
+                        <canvas id="revenueChart"></canvas>
+                    </div>
+                </div>
+                <div class="chart-card">
+                    <h5>Order Status Distribution</h5>
+                    <div class="chart-container">
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="recent-activity">
+                <div class="activity-section">
+                    <h5>Recent Orders</h5>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>User</th>
+                                <th>Service</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-orders">
+                        </tbody>
+                    </table>
+                </div>
+                <div class="activity-section">
+                    <h5>Recent Users</h5>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Registered</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recent-users">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Page -->
+        <div class="page-content" id="page-users" style="display: none;">
+            <div class="page-header">
+                <h2>Users Management</h2>
+                <div class="breadcrumb">Home / Users</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-actions">
+                        <button class="btn btn-primary" onclick="showAddUserModal()"><i class="fas fa-plus"></i> Add User</button>
+                        <button class="btn btn-secondary" onclick="exportUsers()"><i class="fas fa-download"></i> Export CSV</button>
+                    </div>
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Search username/email..." id="user-search" onkeyup="filterUsers()">
+                        <select class="form-control" id="user-status-filter" onchange="filterUsers()">
+                            <option value="">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="banned">Banned</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Username</th>
+                                <th>Email</th>
+                                <th>Balance</th>
+                                <th>Total Spent</th>
+                                <th>Status</th>
+                                <th>Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="users-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Orders Page -->
+        <div class="page-content" id="page-orders" style="display: none;">
+            <div class="page-header">
+                <h2>Orders Management</h2>
+                <div class="breadcrumb">Home / Orders</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Search order ID/link..." id="order-search" onkeyup="filterOrders()">
+                        <select class="form-control" id="order-status-filter" onchange="filterOrders()">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="In Progress">In Progress</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Order ID</th>
+                                <th>User</th>
+                                <th>Service</th>
+                                <th>Link</th>
+                                <th>Quantity</th>
+                                <th>Charge</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="orders-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Services Page -->
+        <div class="page-content" id="page-services" style="display: none;">
+            <div class="page-header">
+                <h2>Services Management</h2>
+                <div class="breadcrumb">Home / Services</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-actions">
+                        <button class="btn btn-primary" onclick="showAddServiceModal()"><i class="fas fa-plus"></i> Add Service</button>
+                        <button class="btn btn-info" onclick="showImportModal()"><i class="fas fa-download"></i> Import from API</button>
+                        <button class="btn btn-success" onclick="syncAllServices()"><i class="fas fa-sync"></i> Sync All</button>
+                    </div>
+                    <div class="table-filters">
+                        <input type="text" class="form-control" placeholder="Search service..." id="service-search" onkeyup="filterServices()">
+                        <select class="form-control" id="service-category-filter" onchange="filterServices()">
+                            <option value="">All Categories</option>
+                            <option value="Facebook">Facebook</option>
+                            <option value="TikTok">TikTok</option>
+                            <option value="Instagram">Instagram</option>
+                            <option value="YouTube">YouTube</option>
+                            <option value="Shopee">Shopee</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Service Name</th>
+                                <th>Category</th>
+                                <th>Type</th>
+                                <th>Rate</th>
+                                <th>Min/Max</th>
+                                <th>Provider</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="services-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Providers Page -->
+        <div class="page-content" id="page-providers" style="display: none;">
+            <div class="page-header">
+                <h2>API Providers</h2>
+                <div class="breadcrumb">Home / API Providers</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-primary" onclick="showAddProviderModal()"><i class="fas fa-plus"></i> Add Provider</button>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Provider Name</th>
+                                <th>API URL</th>
+                                <th>API Key</th>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Services</th>
+                                <th>Last Sync</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="providers-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Payments Page -->
+        <div class="page-content" id="page-payments" style="display: none;">
+            <div class="page-header">
+                <h2>Payments &amp; Transactions</h2>
+                <div class="breadcrumb">Home / Payments</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <div class="table-filters">
+                        <select class="form-control" id="transaction-type-filter" onchange="filterTransactions()">
+                            <option value="">All Types</option>
+                            <option value="Deposit">Deposit</option>
+                            <option value="Order">Order</option>
+                            <option value="Refund">Refund</option>
+                        </select>
+                        <select class="form-control" id="transaction-status-filter" onchange="filterTransactions()">
+                            <option value="">All Status</option>
+                            <option value="Completed">Completed</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>User</th>
+                                <th>Type</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                                <th>Status</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="transactions-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Promotions Page -->
+        <div class="page-content" id="page-promotions" style="display: none;">
+            <div class="page-header">
+                <h2>Promotions Management</h2>
+                <div class="breadcrumb">Home / Promotions</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <button class="btn btn-primary" onclick="showAddDiscountModal()"><i class="fas fa-plus"></i> Add Discount Code</button>
+                </div>
+                <div class="card-body">
+                    <h5>Discount Codes</h5>
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Code</th>
+                                <th>Type</th>
+                                <th>Value</th>
+                                <th>Min Order</th>
+                                <th>Max Uses</th>
+                                <th>Used</th>
+                                <th>Valid From</th>
+                                <th>Valid To</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="discounts-table">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Bonus Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="bonus-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>First Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="10" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>100K Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="5" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>500K Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="8" min="0" max="100">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>1M Deposit Bonus (%)</label>
+                                    <input type="number" class="form-control" value="10" min="0" max="100">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Save Settings</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <!-- Support Page -->
+        <div class="page-content" id="page-support" style="display: none;">
+            <div class="page-header">
+                <h2>Support Tickets</h2>
+                <div class="breadcrumb">Home / Support</div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <table class="data-table">
+                        <thead>
+                            <tr>
+                                <th>Ticket ID</th>
+                                <th>User</th>
+                                <th>Subject</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Created</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>#001</td>
+                                <td>dungnv933</td>
+                                <td>Cannot place order</td>
+                                <td><span class="badge badge-warning">Open</span></td>
+                                <td><span class="badge badge-danger">High</span></td>
+                                <td>2025-10-26 10:00</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="viewTicket(1)"><i class="fas fa-eye"></i></button>
+                                    <button class="btn btn-sm btn-success" onclick="replyTicket(1)"><i class="fas fa-reply"></i></button>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Page -->
+        <div class="page-content" id="page-reports" style="display: none;">
+            <div class="page-header">
+                <h2>Reports &amp; Analytics</h2>
+                <div class="breadcrumb">Home / Reports</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>Revenue Report</h5>
+                    <div class="table-filters">
+                        <input type="date" class="form-control" id="report-date-from">
+                        <input type="date" class="form-control" id="report-date-to">
+                        <button class="btn btn-primary" onclick="generateReport()"><i class="fas fa-chart-line"></i> Generate</button>
+                        <button class="btn btn-secondary" onclick="exportReport()"><i class="fas fa-download"></i> Export CSV</button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="stats-grid">
+                        <div class="stat-card stat-blue">
+                            <div class="stat-details">
+                                <div class="stat-label">Total Revenue</div>
+                                <div class="stat-value">123,456,789đ</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-green">
+                            <div class="stat-details">
+                                <div class="stat-label">Total Orders</div>
+                                <div class="stat-value">5,678</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-orange">
+                            <div class="stat-details">
+                                <div class="stat-label">Average Order</div>
+                                <div class="stat-value">21,756đ</div>
+                            </div>
+                        </div>
+                        <div class="stat-card stat-purple">
+                            <div class="stat-details">
+                                <div class="stat-label">Profit Margin</div>
+                                <div class="stat-value">35%</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container mt-4">
+                        <canvas id="reportChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div class="page-content" id="page-settings" style="display: none;">
+            <div class="page-header">
+                <h2>Settings</h2>
+                <div class="breadcrumb">Home / Settings</div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h5>General Settings</h5>
+                </div>
+                <div class="card-body">
+                    <form id="general-settings-form">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Website Name</label>
+                                    <input type="text" class="form-control" value="HOMEMMO">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Website URL</label>
+                                    <input type="text" class="form-control" value="https://homemmo.com">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Timezone</label>
+                                    <select class="form-control">
+                                        <option>Asia/Ho_Chi_Minh</option>
+                                        <option>Asia/Bangkok</option>
+                                        <option>UTC</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Currency</label>
+                                    <select class="form-control">
+                                        <option>VND (đ)</option>
+                                        <option>USD ($)</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="registration-enabled" checked>
+                                    <label class="form-check-label" for="registration-enabled">Allow User Registration</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="maintenance-mode">
+                                    <label class="form-check-label" for="maintenance-mode">Maintenance Mode</label>
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary mt-3"><i class="fas fa-save"></i> Save Settings</button>
+                    </form>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5>Payment Gateway Settings</h5>
+                </div>
+                <div class="card-body">
+                    <div class="payment-gateway">
+                        <div class="gateway-header">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="vnpay-enabled" checked>
+                                <label class="form-check-label" for="vnpay-enabled"><strong>VNPay</strong></label>
+                            </div>
+                        </div>
+                        <div class="gateway-config">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>API Key</label>
+                                        <input type="text" class="form-control" placeholder="Enter VNPay API Key">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Secret Key</label>
+                                        <input type="password" class="form-control" placeholder="Enter Secret Key">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="payment-gateway mt-3">
+                        <div class="gateway-header">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" class="form-check-input" id="momo-enabled" checked>
+                                <label class="form-check-label" for="momo-enabled"><strong>Momo</strong></label>
+                            </div>
+                        </div>
+                        <div class="gateway-config">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Partner Code</label>
+                                        <input type="text" class="form-control" placeholder="Enter Momo Partner Code">
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group">
+                                        <label>Access Key</label>
+                                        <input type="password" class="form-control" placeholder="Enter Access Key">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary mt-3"><i class="fas fa-save"></i> Save Gateway Settings</button>
+                </div>
+            </div>
+        </div>
+    </main>
+</div>
+
+<!-- Modals -->
+<!-- Add User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New User</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-user-form">
+                    <div class="form-group">
+                        <label>Username</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Password</label>
+                        <input type="password" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Balance</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addUser()">Add User</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Service Modal -->
+<div class="modal fade" id="addServiceModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Service</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-service-form">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Service Name</label>
+                                <input type="text" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Category</label>
+                                <select class="form-control" required>
+                                    <option value="">Select Category</option>
+                                    <option value="Facebook">Facebook</option>
+                                    <option value="TikTok">TikTok</option>
+                                    <option value="Instagram">Instagram</option>
+                                    <option value="YouTube">YouTube</option>
+                                    <option value="Shopee">Shopee</option>
+                                    <option value="Other">Other</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Type</label>
+                                <select class="form-control" required>
+                                    <option value="Default">Default</option>
+                                    <option value="Package">Package</option>
+                                    <option value="Custom Comments">Custom Comments</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>API Provider</label>
+                                <select class="form-control" required>
+                                    <option value="1">BUMX API</option>
+                                    <option value="2">Provider 2</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Rate (per 1000)</label>
+                                <input type="number" class="form-control" step="0.01" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Min Quantity</label>
+                                <input type="number" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="form-group">
+                                <label>Max Quantity</label>
+                                <input type="number" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-group">
+                                <label>Description</label>
+                                <textarea class="form-control" rows="3"></textarea>
+                            </div>
+                        </div>
+                        <div class="col-md-12">
+                            <div class="form-check">
+                                <input type="checkbox" class="form-check-input" id="service-active" checked>
+                                <label class="form-check-label" for="service-active">Active</label>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addService()">Add Service</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Provider Modal -->
+<div class="modal fade" id="addProviderModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add API Provider</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-provider-form">
+                    <div class="form-group">
+                        <label>Provider Name</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>API URL</label>
+                        <input type="text" class="form-control" placeholder="https://api.example.com" required>
+                    </div>
+                    <div class="form-group">
+                        <label>API Key</label>
+                        <input type="text" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-control">
+                            <option>SMM Panel</option>
+                            <option>Custom</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Priority (1-10)</label>
+                        <input type="number" class="form-control" value="5" min="1" max="10">
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" onclick="testConnection()"><i class="fas fa-plug"></i> Test Connection</button>
+                <button type="button" class="btn btn-primary" onclick="addProvider()">Add Provider</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Add Discount Modal -->
+<div class="modal fade" id="addDiscountModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add Discount Code</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="add-discount-form">
+                    <div class="form-group">
+                        <label>Discount Code</label>
+                        <input type="text" class="form-control" placeholder="e.g., SALE20" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Type</label>
+                        <select class="form-control" required>
+                            <option value="percentage">Percentage</option>
+                            <option value="fixed">Fixed Amount</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Value</label>
+                        <input type="number" class="form-control" placeholder="e.g., 20" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Min Order Amount</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                    <div class="form-group">
+                        <label>Max Uses (0 = unlimited)</label>
+                        <input type="number" class="form-control" value="0">
+                    </div>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Valid From</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label>Valid To</label>
+                                <input type="date" class="form-control" required>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="addDiscount()">Add Discount</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Import Services Modal -->
+<div class="modal fade" id="importModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Import Services from API</h5>
+                <button type="button" class="close" data-dismiss="modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>Select Provider</label>
+                    <select class="form-control" id="import-provider">
+                        <option value="1">BUMX API</option>
+                        <option value="2">Provider 2</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Markup Percentage (%)</label>
+                    <input type="number" class="form-control" id="import-markup" value="20" min="0" max="1000">
+                    <small class="form-text text-muted">Price will be multiplied by (1 + markup/100)</small>
+                </div>
+                <button type="button" class="btn btn-info" onclick="fetchProviderServices()"><i class="fas fa-download"></i> Fetch Services</button>
+                <div id="import-preview" class="mt-3" style="display: none;">
+                    <h6>Preview (50 services found)</h6>
+                    <div class="alert alert-info">Services will be imported with 20% markup</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-success" onclick="importServices()"><i class="fas fa-file-import"></i> Import Selected</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
