@@ -693,6 +693,7 @@ function showModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.add('show');
+        modal.style.display = 'flex';
     }
 }
 
@@ -700,6 +701,7 @@ function hideModal(modalId) {
     const modal = document.getElementById(modalId);
     if (modal) {
         modal.classList.remove('show');
+        modal.style.display = 'none';
     }
 }
 
@@ -1103,7 +1105,7 @@ function addProvider() {
 
 function addDiscountCode() {
     console.log('Opening Add Discount Code modal...');
-    showModal('addDiscountCodeModal');
+    showModal('addDiscountModal');
 }
 
 function generateReport() {
