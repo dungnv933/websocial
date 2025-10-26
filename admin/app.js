@@ -118,12 +118,14 @@ function showPage(pageName) {
     // Hide all pages
     document.querySelectorAll('.page-content').forEach(page => {
         page.classList.remove('active');
+        page.style.display = 'none';
     });
     
     // Show selected page
     const targetPage = document.getElementById(`page-${pageName}`);
     if (targetPage) {
         targetPage.classList.add('active');
+        targetPage.style.display = 'block';
     }
     
     // Update active nav item
@@ -272,7 +274,7 @@ function updateStatsCards(stats) {
 }
 
 function updateRecentOrdersTable(orders) {
-    const tbody = document.querySelector('#recentOrdersTable tbody');
+    const tbody = document.querySelector('#recent-orders');
     if (!tbody) return;
     
     tbody.innerHTML = '';
@@ -296,7 +298,7 @@ function updateRecentOrdersTable(orders) {
 }
 
 function updateRecentUsersTable(users) {
-    const tbody = document.querySelector('#recentUsersTable tbody');
+    const tbody = document.querySelector('#recent-users');
     if (!tbody) return;
     
     tbody.innerHTML = '';
@@ -441,7 +443,7 @@ async function loadServicesData() {
 
 // Table update functions
 function updateUsersTable(users) {
-    const tbody = document.querySelector('#usersTable tbody');
+    const tbody = document.querySelector('#users-table');
     if (!tbody) return;
     
     tbody.innerHTML = '';
@@ -472,7 +474,7 @@ function updateUsersTable(users) {
 }
 
 function updateOrdersTable(orders) {
-    const tbody = document.querySelector('#ordersTable tbody');
+    const tbody = document.querySelector('#orders-table');
     if (!tbody) return;
     
     tbody.innerHTML = '';
@@ -505,7 +507,7 @@ function updateOrdersTable(orders) {
 }
 
 function updateServicesTable(services) {
-    const tbody = document.querySelector('#servicesTable tbody');
+    const tbody = document.querySelector('#services-table');
     if (!tbody) return;
     
     tbody.innerHTML = '';

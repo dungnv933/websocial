@@ -235,7 +235,7 @@ body {
 }
 
 .page-content.active {
-    display: block;
+    display: block !important;
 }
 
 .page-header {
