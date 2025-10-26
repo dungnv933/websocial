@@ -3,1618 +3,463 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMM Panel Admin Dashboard</title>
-    
-    <!-- Bootstrap 5 CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Font Awesome -->
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-    
-    <!-- Chart.js - Multiple CDN fallbacks -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.js" onerror="loadChartFallback()"></script>
-    <script src="https://unpkg.com/chart.js@4.4.0/dist/chart.min.js" onerror="loadChartFallback2()"></script>
-    <script>
-        function loadChartFallback() {
-            console.log('Primary Chart.js failed, loading fallback...');
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-            script.onload = function() {
-                console.log('Chart.js loaded from fallback CDN');
-                // Re-initialize charts after fallback loads
-                setTimeout(() => {
-                    if (typeof initializeCharts === 'function') {
-                        initializeCharts();
-                    }
-                }, 100);
-            };
-            script.onerror = function() {
-                console.error('All Chart.js CDNs failed');
-                // Show static content instead of charts
-                document.querySelectorAll('.chart-container').forEach(container => {
-                    container.innerHTML = '<div class="alert alert-info">Charts temporarily unavailable</div>';
-                });
-            };
-            document.head.appendChild(script);
-        }
-        
-        function loadChartFallback2() {
-            console.log('Secondary Chart.js failed, loading final fallback...');
-            const script = document.createElement('script');
-            script.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js';
-            script.onload = function() {
-                console.log('Chart.js loaded from final fallback CDN');
-                setTimeout(() => {
-                    if (typeof initializeCharts === 'function') {
-                        initializeCharts();
-                    }
-                }, 100);
-            };
-            script.onerror = function() {
-                console.error('All Chart.js CDNs failed');
-                document.querySelectorAll('.chart-container').forEach(container => {
-                    container.innerHTML = '<div class="alert alert-info">Charts temporarily unavailable</div>';
-                });
-            };
-            document.head.appendChild(script);
-        }
-    </script>
-    
-    <!-- DataTables -->
-    <link href="https://cdn.datatables.net/1.13.6/css/dataTables.bootstrap5.min.css" rel="stylesheet">
-    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
-    
-    <!-- Custom CSS -->
-    <style>
-        :root {
-            --primary-color: #007bff;
-            --secondary-color: #6c757d;
-            --success-color: #28a745;
-            --danger-color: #dc3545;
-            --warning-color: #ffc107;
-            --info-color: #17a2b8;
-            --dark-color: #343a40;
-            --light-color: #f8f9fa;
-            --sidebar-width: 250px;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: var(--light-color);
-            margin: 0;
-            padding: 0;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            position: fixed;
-            top: 0;
-            left: 0;
-            height: 100vh;
-            width: var(--sidebar-width);
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            z-index: 1000;
-            transition: all 0.3s ease;
-            overflow-y: auto;
-        }
-
-        .sidebar.collapsed {
-            width: 70px;
-        }
-
-        .sidebar-header {
-            padding: 20px;
-            text-align: center;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .sidebar-header h3 {
-            margin: 0;
-            font-size: 1.5rem;
-            font-weight: 600;
-        }
-
-        .sidebar-menu {
-            list-style: none;
-            padding: 0;
-            margin: 0;
-        }
-
-        .sidebar-menu li {
-            margin: 0;
-        }
-
-        .sidebar-menu a {
-            display: flex;
-            align-items: center;
-            padding: 15px 20px;
-            color: white;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            border-left: 3px solid transparent;
-        }
-
-        .sidebar-menu a:hover,
-        .sidebar-menu a.active {
-            background-color: rgba(255,255,255,0.1);
-            border-left-color: white;
-            color: white;
-        }
-
-        .sidebar-menu i {
-            width: 20px;
-            margin-right: 10px;
-            text-align: center;
-        }
-
-        /* Main Content */
-        .main-content {
-            margin-left: var(--sidebar-width);
-            min-height: 100vh;
-            transition: all 0.3s ease;
-        }
-
-        .main-content.expanded {
-            margin-left: 70px;
-        }
-
-        .topbar {
-            background: white;
-            padding: 15px 30px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .content {
-            padding: 30px;
-        }
-
-        /* Stats Cards */
-        .stats-card {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            border-left: 4px solid var(--primary-color);
-            transition: transform 0.3s ease;
-        }
-
-        .stats-card:hover {
-            transform: translateY(-5px);
-        }
-
-        .stats-card.success {
-            border-left-color: var(--success-color);
-        }
-
-        .stats-card.warning {
-            border-left-color: var(--warning-color);
-        }
-
-        .stats-card.danger {
-            border-left-color: var(--danger-color);
-        }
-
-        .stats-card.info {
-            border-left-color: var(--info-color);
-        }
-
-        .stats-icon {
-            font-size: 2.5rem;
-            opacity: 0.8;
-        }
-
-        .stats-number {
-            font-size: 2rem;
-            font-weight: 700;
-            margin: 10px 0;
-        }
-
-        .stats-label {
-            color: #6c757d;
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        /* Charts */
-        .chart-container {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .chart-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--dark-color);
-        }
-
-        /* Tables */
-        .table-container {
-            background: white;
-            border-radius: 10px;
-            padding: 25px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-            margin-bottom: 30px;
-        }
-
-        .table-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-            margin-bottom: 20px;
-            color: var(--dark-color);
-        }
-
-        /* Dark Mode */
-        body.dark-mode {
-            background-color: #1a1a1a;
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .sidebar {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
-        }
-
-        body.dark-mode .topbar,
-        body.dark-mode .stats-card,
-        body.dark-mode .chart-container,
-        body.dark-mode .table-container {
-            background-color: #2d2d2d;
-            color: #e0e0e0;
-        }
-
-        body.dark-mode .table {
-            color: #e0e0e0;
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .sidebar {
-                transform: translateX(-100%);
-            }
-            
-            .sidebar.show {
-                transform: translateX(0);
-            }
-            
-            .main-content {
-                margin-left: 0;
-            }
-            
-            .content {
-                padding: 15px;
-            }
-        }
-
-        /* Loading States */
-        .loading {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 200px;
-        }
-        
-        .spinner {
-            width: 40px;
-            height: 40px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
-        }
-        
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 9999;
-        }
-
-        /* Modal Styles */
-        .modal-content {
-            border-radius: 10px;
-            border: none;
-        }
-
-        .modal-header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border-radius: 10px 10px 0 0;
-        }
-
-        /* Export Buttons */
-        .export-btn {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .export-btn:hover {
-            background: #218838;
-            transform: translateY(-2px);
-        }
-
-        /* Status Badges */
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-            text-transform: uppercase;
-        }
-
-        .status-pending {
-            background-color: #fff3cd;
-            color: #856404;
-        }
-
-        .status-processing {
-            background-color: #d1ecf1;
-            color: #0c5460;
-        }
-
-        .status-completed {
-            background-color: #d4edda;
-            color: #155724;
-        }
-
-        .status-failed {
-            background-color: #f8d7da;
-            color: #721c24;
-        }
-
-        /* Filter Controls */
-        .filter-controls {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-        }
-        
-        .filter-group {
-            display: flex;
-            gap: 15px;
-            align-items: center;
-            flex-wrap: wrap;
-        }
-
-        .filter-group label {
-            font-weight: 600;
-            margin-bottom: 5px;
-        }
-
-        .filter-group select,
-        .filter-group input {
-            padding: 8px 12px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-            font-size: 0.9rem;
-        }
-
-        /* Action Buttons */
-        .action-btn {
-            padding: 6px 12px;
-            border: none;
-            border-radius: 4px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            margin: 2px;
-            transition: all 0.3s ease;
-        }
-        
-        .btn-view {
-            background-color: var(--info-color);
-            color: white;
-        }
-
-        .btn-edit {
-            background-color: var(--warning-color);
-            color: white;
-        }
-
-        .btn-delete {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .btn-ban {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .btn-unban {
-            background-color: var(--success-color);
-            color: white;
-        }
-
-        .action-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-        }
-    </style>
+    <title>HOMEMMO - SMM Panel</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- Sidebar -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <h3><i class="fas fa-chart-line"></i> SMM Panel</h3>
-        </div>
-        <ul class="sidebar-menu">
-            <li><a href="#dashboard" class="nav-link active" data-section="dashboard">
-                <i class="fas fa-tachometer-alt"></i>
-                <span>Dashboard</span>
-            </a></li>
-            <li><a href="#users" class="nav-link" data-section="users">
-                <i class="fas fa-users"></i>
-                <span>Users</span>
-            </a></li>
-            <li><a href="#orders" class="nav-link" data-section="orders">
-                <i class="fas fa-shopping-cart"></i>
-                <span>Orders</span>
-            </a></li>
-            <li><a href="#services" class="nav-link" data-section="services">
-                <i class="fas fa-cogs"></i>
-                <span>Services</span>
-            </a></li>
-            <li><a href="#transactions" class="nav-link" data-section="transactions">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Transactions</span>
-            </a></li>
-            <li><a href="#settings" class="nav-link" data-section="settings">
-                <i class="fas fa-cog"></i>
-                <span>Settings</span>
-            </a></li>
-        </ul>
-        </div>
-        
-    <!-- Main Content -->
-    <div class="main-content" id="mainContent">
-        <!-- Topbar -->
-        <div class="topbar">
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-secondary me-3" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
-                </button>
-                <h4 class="mb-0" id="pageTitle">Dashboard</h4>
-            </div>
-            <div class="d-flex align-items-center">
-                <button class="btn btn-outline-secondary me-2" id="darkModeToggle">
-                    <i class="fas fa-moon"></i>
-                </button>
-                <div class="dropdown">
-                    <button class="btn btn-outline-primary dropdown-toggle" type="button" data-bs-toggle="dropdown">
-                        <i class="fas fa-user"></i> Admin
-                    </button>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-user-cog"></i> Profile</a></li>
-                        <li><a class="dropdown-item" href="#"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
-                    </ul>
-            </div>
-            </div>
-        </div>
 
-        <!-- Content -->
-        <div class="content">
-            <!-- Dashboard Section -->
-            <div id="dashboard-section" class="content-section">
-                <!-- Stats Cards -->
-                <div class="row mb-4">
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="stats-card">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="stats-number" id="totalUsers">0</div>
-                                    <div class="stats-label">Total Users</div>
-                                </div>
-                                <div class="stats-icon text-primary">
-                                    <i class="fas fa-users"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="stats-card success">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="stats-number" id="totalOrders">0</div>
-                                    <div class="stats-label">Total Orders</div>
-                                </div>
-                                <div class="stats-icon text-success">
-                                    <i class="fas fa-shopping-cart"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="stats-card warning">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="stats-number" id="totalRevenue">0</div>
-                                    <div class="stats-label">Revenue (VNĐ)</div>
-                                </div>
-                                <div class="stats-icon text-warning">
-                                    <i class="fas fa-dollar-sign"></i>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-lg-3 col-md-6 mb-3">
-                        <div class="stats-card info">
-                            <div class="d-flex justify-content-between align-items-center">
-                                <div>
-                                    <div class="stats-number" id="apiStatus">Online</div>
-                                    <div class="stats-label">API Status</div>
-                                </div>
-                                <div class="stats-icon text-info">
-                                    <i class="fas fa-server"></i>
-                                </div>
-                            </div>
-                        </div>
-            </div>
-        </div>
-        
-                <!-- Charts -->
-                <div class="row mb-4">
-                    <div class="col-lg-8 mb-3">
-                        <div class="chart-container">
-                            <h5 class="chart-title">Revenue 30 Days</h5>
-                            <canvas id="revenueChart" height="100"></canvas>
-                        </div>
-                    </div>
-                    <div class="col-lg-4 mb-3">
-                        <div class="chart-container">
-                            <h5 class="chart-title">Orders by Service</h5>
-                            <canvas id="ordersChart" height="200"></canvas>
-                        </div>
-                    </div>
+<!-- Header -->
+<header class="main-header">
+    <div class="container-fluid">
+        <div class="header-content">
+            <div class="logo-section">
+                <h1 class="logo">HOMEMMO</h1>
+                <p class="tagline">like thấp muốn nôi</p>
             </div>
             
-                <!-- Recent Data Tables -->
-                <div class="row">
-                    <div class="col-lg-6 mb-3">
-                        <div class="table-container">
-                            <h5 class="table-title">Recent Orders</h5>
+            <div class="header-actions">
+                <button class="btn btn-orange" onclick="showPriceList()"><i class="fas fa-list"></i> Bảng giá</button>
+                <button class="btn btn-green" onclick="showDepositModal()"><i class="fas fa-wallet"></i> Nạp tiền</button>
+                <div class="dropdown">
+                    <button class="btn btn-blue dropdown-toggle" type="button" data-toggle="dropdown">
+                        <i class="fas fa-user"></i> Thông tin
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right">
+                        <a class="dropdown-item" href="#" onclick="showProfileTab(); return false;"><i class="fas fa-user-circle"></i> Hồ sơ</a>
+                        <a class="dropdown-item" href="#" onclick="showOrdersTab(); return false;"><i class="fas fa-shopping-cart"></i> Đơn hàng</a>
+                        <a class="dropdown-item" href="#" onclick="showTransactionsTab(); return false;"><i class="fas fa-history"></i> Giao dịch</a>
+                        <div class="dropdown-divider"></div>
+                        <a class="dropdown-item" href="#" onclick="logout(); return false;"><i class="fas fa-sign-out-alt"></i> Đăng xuất</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="user-info-bar">
+            <div class="user-greeting">
+                <span>Hi! <strong>dungnv933</strong></span>
+                <span class="member-badge"><i class="fas fa-star"></i> Thành viên Cấp 3 <i class="fas fa-star"></i><i class="fas fa-star"></i><i class="fas fa-star"></i></span>
+            </div>
+            <div class="user-balance">
+                <span class="balance-label">Số dư:</span>
+                <span class="balance-amount" id="user-balance">2.3906đ</span>
+            </div>
+        </div>
+        
+        <div class="alert-banner">
+            <i class="fas fa-exclamation-triangle"></i>
+            Vui lòng cập nhật Email! để tài khoản được bảo vệ
+        </div>
+    </div>
+</header>
+
+<!-- Main Container -->
+<div class="main-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <button class="sidebar-toggle" onclick="toggleSidebar()">
+            <i class="fas fa-bars"></i>
+        </button>
+        
+        <nav class="sidebar-nav">
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('facebook')">
+                    <i class="fab fa-facebook"></i> DỊCH VỤ FACEBOOK
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-facebook">
+                    <a href="#" onclick="selectService('fb-like'); return false;">👍 Tăng Like bài viết FB <span class="item-count">(264)</span></a>
+                    <a href="#" onclick="selectService('fb-share'); return false;">📊 Tăng Share bài viết FB <span class="item-count">(2404)</span></a>
+                    <a href="#" onclick="selectService('fb-comment'); return false;">💬 Tăng Comment FB <span class="item-count">(204)</span></a>
+                    <a href="#" onclick="selectService('fb-like-comment'); return false;">👍 Tăng Like cho Bình luận <span class="item-count">(24)</span></a>
+                    <a href="#" onclick="selectService('fb-livestream'); return false;">👁️ Tăng mắt LiveStream <span class="item-count">(4)</span></a>
+                    <a href="#" onclick="selectService('fb-follow'); return false;">➕ Tăng Follow FB có nhận <span class="item-count">(64)</span></a>
+                    <a href="#" onclick="selectService('fb-fanpage'); return false;">📱 Tăng Like, follow Fanpage <span class="item-count">(404)</span></a>
+                    <a href="#" onclick="selectService('fb-group'); return false;">👥 Tăng member Group <span class="item-count">(404)</span></a>
+                    <a href="#" onclick="selectService('fb-video'); return false;">🎥 Tăng view Video FB <span class="item-count">(104)</span></a>
+                    <a href="#" onclick="selectService('fb-rating'); return false;">⭐ Tăng đánh giá Fanpage <span class="item-count">(204)</span></a>
+                    <a href="#" onclick="selectService('fb-viplike'); return false;">💎 VipLike - Like thằng <span class="item-count">(104)</span></a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('tiktok')">
+                    <i class="fab fa-tiktok"></i> TIKTOK
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-tiktok">
+                    <a href="#" onclick="selectService('tt-like'); return false;">🎵 Tăng Like, tim TikTok <span class="item-count">(244)</span></a>
+                    <a href="#" onclick="selectService('tt-follow'); return false;">➕ Tăng Follow TikTok <span class="item-count">(504)</span></a>
+                    <a href="#" onclick="selectService('tt-livestream'); return false;">👁️ Tăng mắt live TikTok <span class="item-count">(4)</span></a>
+                    <a href="#" onclick="selectService('tt-comment'); return false;">💬 Tăng comment TikTok <span class="item-count">(244)</span></a>
+                    <a href="#" onclick="selectService('tt-share'); return false;">🔄 Tăng Share TikTok <span class="item-count">(104)</span></a>
+                    <a href="#" onclick="selectService('tt-view'); return false;">📹 Tăng view TikTok <span class="item-count">(244)</span></a>
+                    <a href="#" onclick="selectService('tt-save'); return false;">💾 Tăng Save TikTok <span class="item-count">(104)</span></a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('instagram')">
+                    <i class="fab fa-instagram"></i> INSTAGRAM
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-instagram">
+                    <a href="#" onclick="selectService('ig-follow'); return false;">➕ Tăng Follow Instagram <span class="item-count">(894)</span></a>
+                    <a href="#" onclick="selectService('ig-view'); return false;">👁️ Tăng view Instagram <span class="item-count">(4)</span></a>
+                    <a href="#" onclick="selectService('ig-like'); return false;">❤️ Tăng Like, tim Instagram <span class="item-count">(24)</span></a>
+                    <a href="#" onclick="selectService('ig-comment'); return false;">💬 Tăng comment Instagram <span class="item-count">(244)</span></a>
+                    <a href="#" onclick="selectService('ig-viplike'); return false;">💎 VipLike Ins - gói thắng <span class="item-count">(404)</span></a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('youtube')">
+                    <i class="fab fa-youtube"></i> YOUTUBE, GOOGLE
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-youtube">
+                    <a href="#" onclick="selectService('yt-premium'); return false;">💎 Youtube Premium <span class="item-count">(300,004)</span></a>
+                    <a href="#" onclick="selectService('yt-view'); return false;">📺 Tăng view, giờ xem YT <span class="item-count">(404)</span></a>
+                    <a href="#" onclick="selectService('yt-like'); return false;">👍 Tăng Like Youtube <span class="item-count">(404)</span></a>
+                    <a href="#" onclick="selectService('yt-livestream'); return false;">👁️ Tăng mắt LiveStream YT <span class="item-count">(4)</span></a>
+                    <a href="#" onclick="selectService('yt-sub'); return false;">📹 Tăng Sub Youtube <span class="item-count">(404)</span></a>
+                    <a href="#" onclick="selectService('yt-comment'); return false;">💬 Tăng comment Youtube <span class="item-count">(104)</span></a>
+                    <a href="#" onclick="selectService('yt-maps'); return false;">⭐ Tăng đánh giá gò maps <span class="item-count">(14,004)</span></a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('shopee')">
+                    <i class="fas fa-shopping-bag"></i> SHOPEE
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-shopee">
+                    <a href="#" onclick="selectService('shopee-like'); return false;">🏪 Tăng Like Shopee <span class="item-count">(504)</span></a>
+                    <a href="#" onclick="selectService('shopee-follow'); return false;">➕ Tăng Follow Shopee <span class="item-count">(404)</span></a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('other')">
+                    <i class="fas fa-globe"></i> TELEGRAM, TWITTER
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-other">
+                    <a href="#" onclick="selectService('twitter-like'); return false;">🐦 Tăng Like Twitter <span class="item-count">(504)</span></a>
+                    <a href="#" onclick="selectService('twitter-follow'); return false;">➕ Follow Twitter <span class="item-count">(104)</span></a>
+                    <a href="#" onclick="selectService('telegram'); return false;">💬 Member/Sub Telegram <span class="item-count">(104)</span></a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('tools')">
+                    <i class="fas fa-tools"></i> CHỖ THÁNH VẤN
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-tools">
+                    <a href="#" onclick="showOrdersTab(); return false;">📋 Lịch sử đơn hàng</a>
+                    <a href="#" onclick="showPriceList(); return false;">💰 Bảng giá Công gia viên</a>
+                    <a href="#" onclick="showFindId(); return false;">🔍 Tìm ID facebook</a>
+                    <a href="#" onclick="showNotifications(); return false;">🔔 Thông báo</a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('contact')">
+                    <i class="fas fa-phone"></i> LIÊN HỆ
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-contact">
+                    <a href="https://facebook.com/like68vn" target="_blank">📘 Fanpage Like68.vn</a>
+                    <a href="#" target="_blank">👨‍💼 Admin Like68.vn</a>
+                    <a href="#" onclick="showContact(); return false;">📧 Liên hệ</a>
+                </div>
+            </div>
+            
+            <div class="nav-section">
+                <div class="nav-section-header" onclick="toggleSection('blog')">
+                    <i class="fas fa-newspaper"></i> BÀI VIẾT
+                    <i class="fas fa-chevron-down toggle-icon"></i>
+                </div>
+                <div class="nav-section-content" id="section-blog">
+                    <a href="#">📱 Dịch vụ Tăng mắt Facebook</a>
+                    <a href="#">📢 Quảng cáo Facebook</a>
+                    <a href="#">📢 Quảng cáo TikTok</a>
+                    <a href="#">💳 Tích hợp thanh toán Ngân hàng</a>
+                    <a href="#">⚡ Tăng mắt tốc độ Facebook</a>
+                </div>
+            </div>
+        </nav>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="content-wrapper">
+            <!-- Profile Tab -->
+            <div class="tab-content" id="profile-tab">
+                <div class="card">
+                    <div class="card-header">
+                        <ul class="nav nav-tabs card-header-tabs">
+                            <li class="nav-item">
+                                <a class="nav-link active" href="#" onclick="switchTab('info'); return false;">Thông tin</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="switchTab('orders'); return false;">Đơn hàng</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link" href="#" onclick="switchTab('transactions'); return false;">Lịch giao dịch</a>
+                            </li>
+                        </ul>
+                    </div>
+                    <div class="card-body">
+                        <!-- Info Content -->
+                        <div class="tab-pane" id="info-content">
+                            <h5 class="mb-4">Cập nhật thông tin cá nhân</h5>
+                            <form id="profile-form">
+                                <div class="form-group">
+                                    <label>Email <span class="text-danger">*</span></label>
+                                    <input type="email" class="form-control" id="user-email" placeholder="Vui lòng cập nhật email">
+                                    <small class="form-text text-danger">⚠️ Cần cập nhật để bảo vệ tài khoản</small>
+                                </div>
+                                <div class="form-group">
+                                    <label>Tên đăng nhập</label>
+                                    <input type="text" class="form-control" value="dungnv933" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label>Điện thoại</label>
+                                    <input type="tel" class="form-control" value="0374349033" id="user-phone">
+                                </div>
+                                <div class="form-group">
+                                    <label>Mật khẩu mới</label>
+                                    <input type="password" class="form-control" id="new-password" placeholder="Để trống nếu không đổi">
+                                </div>
+                                <div class="form-group">
+                                    <label>Nhập lại mật khẩu mới</label>
+                                    <input type="password" class="form-control" id="confirm-password" placeholder="Nhập lại mật khẩu">
+                                </div>
+                                <button type="submit" class="btn btn-primary"><i class="fas fa-save"></i> Cập nhật thông tin</button>
+                            </form>
+                        </div>
+                        
+                        <!-- Orders Content -->
+                        <div class="tab-pane" id="orders-content" style="display: none;">
+                            <h5 class="mb-4">Lịch sử đơn hàng</h5>
                             <div class="table-responsive">
-                                <table class="table table-hover" id="recentOrdersTable">
+                                <table class="table table-hover">
                                     <thead>
                                         <tr>
                                             <th>ID</th>
-                                            <th>User</th>
-                                            <th>Service</th>
-                                            <th>Status</th>
-                                            <th>Amount</th>
+                                            <th>Dịch vụ</th>
+                                            <th>Link</th>
+                                            <th>Số lượng</th>
+                                            <th>Giá</th>
+                                            <th>Trạng thái</th>
+                                            <th>Ngày tạo</th>
                                         </tr>
                                     </thead>
-                                    <tbody>
-                                        <!-- Data will be loaded here -->
+                                    <tbody id="orders-table-body">
+                                        <tr>
+                                            <td>ORD-12345</td>
+                                            <td>Tăng Like FB</td>
+                                            <td><a href="#" class="text-truncate" style="max-width:150px;display:block;">https://facebook.com/post/123</a></td>
+                                            <td>1,000</td>
+                                            <td>25,000đ</td>
+                                            <td><span class="badge badge-success">Completed</span></td>
+                                            <td>25/10/2025 09:00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>ORD-12346</td>
+                                            <td>Tăng Follow TikTok</td>
+                                            <td><a href="#" class="text-truncate" style="max-width:150px;display:block;">https://tiktok.com/@user</a></td>
+                                            <td>500</td>
+                                            <td>50,000đ</td>
+                                            <td><span class="badge badge-warning">Processing</span></td>
+                                            <td>25/10/2025 10:30</td>
+                                        </tr>
                                     </tbody>
                                 </table>
-                </div>
+                            </div>
                         </div>
-                    </div>
-                    <div class="col-lg-6 mb-3">
-                        <div class="table-container">
-                            <h5 class="table-title">Recent Users</h5>
+                        
+                        <!-- Transactions Content -->
+                        <div class="tab-pane" id="transactions-content" style="display: none;">
+                            <h5 class="mb-4">Lịch sử giao dịch</h5>
                             <div class="table-responsive">
-                                <table class="table table-hover" id="recentUsersTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Email</th>
-                                            <th>Balance</th>
-                                            <th>Status</th>
-                                            <th>Joined</th>
-                        </tr>
-                    </thead>
-                                    <tbody>
-                                        <!-- Data will be loaded here -->
-                    </tbody>
-                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Users Section -->
-            <div id="users-section" class="content-section" style="display: none;">
-                <div class="filter-controls">
-                    <div class="filter-group">
-                        <div>
-                            <label>Search:</label>
-                            <input type="text" id="userSearch" placeholder="Search by email...">
-                </div>
-                        <div>
-                            <label>Status:</label>
-                            <select id="userStatusFilter">
-                                <option value="">All</option>
-                                <option value="active">Active</option>
-                                <option value="banned">Banned</option>
-                            </select>
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" id="exportUsersBtn">
-                                <i class="fas fa-download"></i> Export CSV
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <h5 class="table-title">Users Management</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="usersTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                                    <th>Email</th>
-                                    <th>Balance</th>
-                                    <th>Total Spent</th>
-                                    <th>Status</th>
-                                    <th>Joined</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                            <tbody>
-                                <!-- Data will be loaded here -->
-                    </tbody>
-                </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Orders Section -->
-            <div id="orders-section" class="content-section" style="display: none;">
-                <div class="filter-controls">
-                    <div class="filter-group">
-                        <div>
-                            <label>Status:</label>
-                            <select id="orderStatusFilter">
-                                <option value="">All</option>
-                                <option value="pending">Pending</option>
-                                <option value="processing">Processing</option>
-                                <option value="completed">Completed</option>
-                                <option value="failed">Failed</option>
-                            </select>
-                </div>
-                        <div>
-                            <label>From:</label>
-                            <input type="date" id="orderDateFrom">
-                        </div>
-                        <div>
-                            <label>To:</label>
-                            <input type="date" id="orderDateTo">
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" id="exportOrdersBtn">
-                                <i class="fas fa-download"></i> Export CSV
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <h5 class="table-title">Orders Management</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="ordersTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                                    <th>User</th>
-                                    <th>Service</th>
-                                    <th>Link</th>
-                                    <th>Quantity</th>
-                                    <th>Status</th>
-                                    <th>Amount</th>
-                                    <th>Created</th>
-                                    <th>Actions</th>
-                        </tr>
-                    </thead>
-                            <tbody>
-                                <!-- Data will be loaded here -->
-                    </tbody>
-                </table>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Services Section -->
-            <div id="services-section" class="content-section" style="display: none;">
-                <div class="filter-controls">
-                    <div class="filter-group">
-                        <div>
-                            <label>Category:</label>
-                            <select id="serviceCategoryFilter">
-                                <option value="">All</option>
-                                <option value="youtube">YouTube</option>
-                                <option value="tiktok">TikTok</option>
-                                <option value="facebook">Facebook</option>
-                                <option value="instagram">Instagram</option>
-                            </select>
-                </div>
-                        <div>
-                            <button class="btn btn-success" id="syncServicesBtn">
-                                <i class="fas fa-sync"></i> Sync from BUMX
-                            </button>
-                        </div>
-                        <div>
-                            <small class="text-muted" id="lastSyncTime">Last sync: Never</small>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="row" id="servicesGrid">
-                    <!-- Services will be loaded here as cards -->
-                </div>
-            </div>
-
-            <!-- Transactions Section -->
-            <div id="transactions-section" class="content-section" style="display: none;">
-                <div class="filter-controls">
-                    <div class="filter-group">
-                        <div>
-                            <label>Type:</label>
-                            <select id="transactionTypeFilter">
-                                <option value="">All</option>
-                                <option value="deposit">Deposit</option>
-                                <option value="order_payment">Order Payment</option>
-                                <option value="refund">Refund</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label>From:</label>
-                            <input type="date" id="transactionDateFrom">
-                        </div>
-                        <div>
-                            <label>To:</label>
-                            <input type="date" id="transactionDateTo">
-                        </div>
-                        <div>
-                            <button class="btn btn-primary" id="exportTransactionsBtn">
-                                <i class="fas fa-download"></i> Export CSV
-                            </button>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="table-container">
-                    <h5 class="table-title">Transactions History</h5>
-                    <div class="table-responsive">
-                        <table class="table table-hover" id="transactionsTable">
-                    <thead>
-                        <tr>
-                            <th>ID</th>
-                                    <th>User</th>
-                                    <th>Type</th>
-                                    <th>Amount</th>
-                                    <th>Balance Before</th>
-                                    <th>Balance After</th>
-                                    <th>Date</th>
-                        </tr>
-                    </thead>
-                            <tbody>
-                                <!-- Data will be loaded here -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-
-            <!-- Settings Section -->
-            <div id="settings-section" class="content-section" style="display: none;">
-                <div class="row">
-                    <div class="col-lg-6 mb-3">
-                        <div class="table-container">
-                            <h5 class="table-title">API Configuration</h5>
-                            <form id="apiConfigForm">
-                                <div class="mb-3">
-                                    <label class="form-label">BUMX API URL</label>
-                                    <input type="text" class="form-control" id="bumxApiUrl" value="https://api-v2.bumx.vn/api/v2">
-                                </div>
-                                <div class="mb-3">
-                                    <label class="form-label">BUMX API Key</label>
-                                    <input type="password" class="form-control" id="bumxApiKey" value="4b45e706-ec05-45d2-bfb5-2efa54e4d84d">
-                                </div>
-                                <button type="submit" class="btn btn-primary">Save Configuration</button>
-                            </form>
-                        </div>
-                    </div>
-                    <div class="col-lg-6 mb-3">
-                        <div class="table-container">
-                            <h5 class="table-title">System Information</h5>
-                            <div class="row">
-                                <div class="col-6">
-                                    <strong>Backend Status:</strong>
-                                    <span class="badge bg-success" id="backendStatus">Online</span>
-                                </div>
-                                <div class="col-6">
-                                    <strong>Database:</strong>
-                                    <span class="badge bg-success" id="databaseStatus">Connected</span>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <strong>Uptime:</strong>
-                                    <span id="systemUptime">-</span>
-                                </div>
-                                <div class="col-6 mt-2">
-                                    <strong>Memory Usage:</strong>
-                                    <span id="memoryUsage">-</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Error Log Section -->
-                <div class="row">
-                    <div class="col-12">
-                        <div class="table-container">
-                            <h5 class="table-title">Error Log <button class="btn btn-sm btn-outline-danger" onclick="clearErrorLog()">Clear Log</button></h5>
-                            <div id="errorLog" style="max-height: 400px; overflow-y: auto; background: #f8f9fa; padding: 15px; border-radius: 5px;">
-                                <div class="text-muted">No errors logged yet...</div>
+                                <table class="table table-hover">
+                                    <thead>
+                                        <tr>
+                                            <th>ID</th>
+                                            <th>Loại</th>
+                                            <th>Số tiền</th>
+                                            <th>Số dư trước</th>
+                                            <th>Số dư sau</th>
+                                            <th>Ngày tạo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="transactions-table-body">
+                                        <tr>
+                                            <td>TXN-001</td>
+                                            <td><span class="badge badge-success">Nạp tiền</span></td>
+                                            <td class="text-success">+500,000đ</td>
+                                            <td>0đ</td>
+                                            <td>500,000đ</td>
+                                            <td>20/10/2025 10:00</td>
+                                        </tr>
+                                        <tr>
+                                            <td>TXN-002</td>
+                                            <td><span class="badge badge-warning">Thanh toán</span></td>
+                                            <td class="text-danger">-25,000đ</td>
+                                            <td>500,000đ</td>
+                                            <td>475,000đ</td>
+                                            <td>25/10/2025 09:00</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Toast Container -->
-    <div class="toast-container"></div>
-
-    <!-- Modals -->
-    <!-- User Detail Modal -->
-    <div class="modal fade" id="userDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">User Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="userDetailContent">
-                        <!-- User details will be loaded here -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-primary" id="addBalanceBtn">Add Balance</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Order Detail Modal -->
-    <div class="modal fade" id="orderDetailModal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Order Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <div id="orderDetailContent">
-                        <!-- Order details will be loaded here -->
-                    </div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                    <button type="button" class="btn btn-warning" id="updateStatusBtn">Update Status</button>
-                    <button type="button" class="btn btn-danger" id="refundOrderBtn">Refund</button>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
-    <!-- Custom JavaScript -->
-    <script>
-        // Global variables
-        let currentSection = 'dashboard';
-        let autoRefreshInterval;
-        let charts = {};
-
-        // Initialize the application
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check if Chart.js is loaded
-            if (typeof Chart === 'undefined') {
-                console.error('Chart.js not loaded!');
-                showErrorDetails(new Error('Chart.js library not loaded'), 'Chart.js Loading');
-                
-                // Hide chart containers and show error message
-                const chartContainers = document.querySelectorAll('.chart-container');
-                chartContainers.forEach(container => {
-                    container.innerHTML = '<div class="alert alert-warning">Chart.js không thể tải. Vui lòng refresh trang.</div>';
-                });
-            }
-            
-            initializeApp();
-        });
-
-        function initializeApp() {
-            setupEventListeners();
-            loadDashboardData();
-            startAutoRefresh();
-            initializeCharts();
-        }
-
-        function setupEventListeners() {
-            // Sidebar navigation
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.addEventListener('click', function(e) {
-                    e.preventDefault();
-                    const section = this.dataset.section;
-                    showSection(section);
-                });
-            });
-
-            // Sidebar toggle
-            document.getElementById('sidebarToggle').addEventListener('click', toggleSidebar);
-
-            // Dark mode toggle
-            document.getElementById('darkModeToggle').addEventListener('click', toggleDarkMode);
-
-            // Export buttons
-            document.getElementById('exportUsersBtn').addEventListener('click', exportUsers);
-            document.getElementById('exportOrdersBtn').addEventListener('click', exportOrders);
-            document.getElementById('exportTransactionsBtn').addEventListener('click', exportTransactions);
-
-            // Sync services
-            document.getElementById('syncServicesBtn').addEventListener('click', syncServices);
-
-            // API config form
-            document.getElementById('apiConfigForm').addEventListener('submit', saveApiConfig);
-        }
-
-        function showSection(section) {
-            // Hide all sections
-            document.querySelectorAll('.content-section').forEach(sec => {
-                sec.style.display = 'none';
-            });
-
-            // Show selected section
-            document.getElementById(section + '-section').style.display = 'block';
-
-            // Update active nav link
-            document.querySelectorAll('.nav-link').forEach(link => {
-                link.classList.remove('active');
-            });
-            document.querySelector(`[data-section="${section}"]`).classList.add('active');
-
-            // Update page title
-            const titles = {
-                dashboard: 'Dashboard',
-                users: 'Users Management',
-                orders: 'Orders Management',
-                services: 'Services',
-                transactions: 'Transactions',
-                settings: 'Settings'
-            };
-            document.getElementById('pageTitle').textContent = titles[section];
-
-            currentSection = section;
-
-            // Load section-specific data
-            switch(section) {
-                case 'dashboard':
-                    loadDashboardData();
-                    break;
-                case 'users':
-                    loadUsersData();
-                    break;
-                case 'orders':
-                    loadOrdersData();
-                    break;
-                case 'services':
-                    loadServicesData();
-                    break;
-                case 'transactions':
-                    loadTransactionsData();
-                    break;
-                case 'settings':
-                    loadSettingsData();
-                    break;
-            }
-        }
         
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const mainContent = document.getElementById('mainContent');
-            
-            sidebar.classList.toggle('collapsed');
-            mainContent.classList.toggle('expanded');
-        }
+        <!-- Service Cards Panel -->
+        <aside class="services-panel">
+            <h5 class="panel-title">Dịch vụ nổi bật</h5>
+            <div class="services-list" id="services-list">
+                <!-- Service cards will be populated by JS -->
+            </div>
+        </aside>
+    </main>
+</div>
 
-        function toggleDarkMode() {
-            document.body.classList.toggle('dark-mode');
-            const icon = document.getElementById('darkModeToggle').querySelector('i');
-            icon.classList.toggle('fa-moon');
-            icon.classList.toggle('fa-sun');
-        }
+<!-- Footer -->
+<footer class="main-footer">
+    <div class="container-fluid">
+        <div class="footer-content">
+            <div class="footer-left">
+                <p>⚡ Hệ thống hoạt động 24/24</p>
+                <p>Dev by <strong>Like68.vn</strong></p>
+            </div>
+            <div class="footer-center">
+                <a href="#">Điều khoản &amp; Quy định</a>
+                <span class="separator">|</span>
+                <a href="#">Chính sách bảo mật</a>
+                <span class="separator">|</span>
+                <a href="#">Liên hệ</a>
+            </div>
+        </div>
+    </div>
+</footer>
 
-        function startAutoRefresh() {
-            // Auto refresh every 60 seconds
-            autoRefreshInterval = setInterval(() => {
-                if (currentSection === 'dashboard') {
-                    loadDashboardData();
-                }
-            }, 60000);
-        }
+<!-- Chat Support Button -->
+<button class="chat-support-btn" onclick="openChat()">
+    <i class="fas fa-comments"></i>
+    <span>Chat hỗ trợ</span>
+</button>
 
-        // Data loading functions
-        async function loadDashboardData() {
-            try {
-                showLoading('dashboard-section');
-                console.log('Loading dashboard data...');
-                
-                // Load stats
-                const statsResponse = await fetch('/api/admin/stats?t=' + Date.now());
-                console.log('Stats response:', statsResponse.status);
-                if (!statsResponse.ok) {
-                    throw new Error(`HTTP ${statsResponse.status}: ${statsResponse.statusText}`);
-                }
-                const stats = await statsResponse.json();
-                console.log('Stats data:', stats);
-                
-                document.getElementById('totalUsers').textContent = stats.totalUsers || 0;
-                document.getElementById('totalOrders').textContent = stats.totalOrders || 0;
-                document.getElementById('totalRevenue').textContent = formatCurrency(stats.totalRevenue || 0);
-                document.getElementById('apiStatus').textContent = stats.apiStatus || 'Online';
+<!-- Order Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Tạo đơn hàng</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="order-form">
+                    <div class="form-group">
+                        <label>Chọn dịch vụ</label>
+                        <select class="form-control" id="order-service" required>
+                            <option value="">-- Chọn dịch vụ --</option>
+                            <option value="1">Tăng Like FB - Nhanh - Clone (2.5đ/like)</option>
+                            <option value="2">Tăng Follow TikTok - VIP (100đ/follow)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Link/URL</label>
+                        <input type="url" class="form-control" id="order-link" placeholder="Nhập link bài viết, profile..." required>
+                        <small class="form-text text-muted">Nhập link đầy đủ của bài viết hoặc profile cần tăng</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Số lượng</label>
+                        <input type="number" class="form-control" id="order-quantity" placeholder="Min: 100 - Max: 10,000" min="100" max="10000" required>
+                        <small class="form-text text-muted">Số lượng tối thiểu: <strong>100</strong>, tối đa: <strong>10,000</strong></small>
+                    </div>
+                    <div class="form-group">
+                        <label>Tổng tiền</label>
+                        <div class="price-display" id="order-price">0đ</div>
+                    </div>
+                    <div class="form-group">
+                        <label>Ghi chú (tùy chọn)</label>
+                        <textarea class="form-control" id="order-note" rows="3" placeholder="Thêm ghi chú cho đơn hàng..."></textarea>
+                    </div>
+                    <div class="alert alert-info">
+                        <i class="fas fa-info-circle"></i> Số dư hiện tại: <strong id="current-balance">2.3906đ</strong>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-primary" onclick="submitOrder()"><i class="fas fa-shopping-cart"></i> Tạo đơn</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-                // Load recent orders
-                const ordersResponse = await fetch('/api/admin/orders?limit=5&t=' + Date.now());
-                console.log('Orders response:', ordersResponse.status);
-                if (ordersResponse.ok) {
-                    const orders = await ordersResponse.json();
-                    populateRecentOrdersTable(orders.orders || []);
-                }
-
-                // Load recent users
-                const usersResponse = await fetch('/api/admin/users?limit=5&t=' + Date.now());
-                console.log('Users response:', usersResponse.status);
-                if (usersResponse.ok) {
-                    const users = await usersResponse.json();
-                    populateRecentUsersTable(users.users || []);
-                }
-
-                // Update charts
-                updateCharts(stats);
-
-                hideLoading('dashboard-section');
-                console.log('Dashboard data loaded successfully');
-            } catch (error) {
-                showErrorDetails(error, 'Dashboard Data Loading');
-                hideLoading('dashboard-section');
-            }
-        }
-
-        async function loadUsersData() {
-            try {
-                showLoading('users-section');
-                
-                const response = await fetch('/api/admin/users?t=' + Date.now());
-                const users = await response.json();
-                
-                populateUsersTable(users.users || []);
-                hideLoading('users-section');
-            } catch (error) {
-                showErrorDetails(error, 'Users Data Loading');
-                hideLoading('users-section');
-            }
-        }
-
-        async function loadOrdersData() {
-            try {
-                showLoading('orders-section');
-                
-                const response = await fetch('/api/admin/orders?t=' + Date.now());
-                const orders = await response.json();
-                
-                populateOrdersTable(orders.orders || []);
-                hideLoading('orders-section');
-            } catch (error) {
-                showErrorDetails(error, 'Orders Data Loading');
-                hideLoading('orders-section');
-            }
-        }
-
-        async function loadServicesData() {
-            try {
-                showLoading('services-section');
-                
-                const response = await fetch('/api/services?t=' + Date.now());
-                const services = await response.json();
-                
-                populateServicesGrid(services.services || []);
-                hideLoading('services-section');
-            } catch (error) {
-                showErrorDetails(error, 'Services Data Loading');
-                hideLoading('services-section');
-            }
-        }
-
-        async function loadTransactionsData() {
-            try {
-                showLoading('transactions-section');
-                
-                const response = await fetch('/api/admin/transactions?t=' + Date.now());
-                const transactions = await response.json();
-                
-                populateTransactionsTable(transactions.transactions || []);
-                hideLoading('transactions-section');
-            } catch (error) {
-                showErrorDetails(error, 'Transactions Data Loading');
-                hideLoading('transactions-section');
-            }
-        }
-
-        async function loadSettingsData() {
-            try {
-                // Load system info
-                const response = await fetch('/api/admin/system-info');
-                const systemInfo = await response.json();
-                
-                document.getElementById('backendStatus').textContent = systemInfo.backendStatus || 'Online';
-                document.getElementById('databaseStatus').textContent = systemInfo.databaseStatus || 'Connected';
-                document.getElementById('systemUptime').textContent = systemInfo.uptime || '-';
-                document.getElementById('memoryUsage').textContent = systemInfo.memoryUsage || '-';
-            } catch (error) {
-                console.error('Error loading settings data:', error);
-            }
-        }
-
-        // Table population functions
-        function populateRecentOrdersTable(orders) {
-            const tbody = document.querySelector('#recentOrdersTable tbody');
-                tbody.innerHTML = '';
-            
-            orders.forEach(order => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${order.id}</td>
-                    <td>${order.user_email}</td>
-                        <td>${order.service_name}</td>
-                    <td><span class="status-badge status-${order.status}">${order.status}</span></td>
-                    <td>${formatCurrency(order.price)}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-        }
-
-        function populateRecentUsersTable(users) {
-            const tbody = document.querySelector('#recentUsersTable tbody');
-            tbody.innerHTML = '';
-            
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.email}</td>
-                    <td>${formatCurrency(user.balance)}</td>
-                    <td><span class="status-badge ${user.is_active ? 'status-completed' : 'status-failed'}">${user.is_active ? 'Active' : 'Banned'}</span></td>
-                    <td>${formatDate(user.created_at)}</td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function populateUsersTable(users) {
-            const tbody = document.querySelector('#usersTable tbody');
-            tbody.innerHTML = '';
-            
-            users.forEach(user => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${user.id}</td>
-                    <td>${user.email}</td>
-                    <td>${formatCurrency(user.balance)}</td>
-                    <td>${formatCurrency(user.total_spent)}</td>
-                    <td><span class="status-badge ${user.is_active ? 'status-completed' : 'status-failed'}">${user.is_active ? 'Active' : 'Banned'}</span></td>
-                    <td>${formatDate(user.created_at)}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewUser(${user.id})">View</button>
-                        <button class="action-btn ${user.is_active ? 'btn-ban' : 'btn-unban'}" onclick="${user.is_active ? 'banUser' : 'unbanUser'}(${user.id})">
-                            ${user.is_active ? 'Ban' : 'Unban'}
-                        </button>
-                    </td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        function populateOrdersTable(orders) {
-            const tbody = document.querySelector('#ordersTable tbody');
-                tbody.innerHTML = '';
-            
-            orders.forEach(order => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                    <td>${order.id}</td>
-                    <td>${order.user_email}</td>
-                    <td>${order.service_name}</td>
-                    <td><a href="${order.link}" target="_blank" class="text-truncate" style="max-width: 100px;">${order.link}</a></td>
-                    <td>${order.quantity}</td>
-                    <td><span class="status-badge status-${order.status}">${order.status}</span></td>
-                    <td>${formatCurrency(order.price)}</td>
-                    <td>${formatDate(order.created_at)}</td>
-                    <td>
-                        <button class="action-btn btn-view" onclick="viewOrder(${order.id})">View</button>
-                        <button class="action-btn btn-edit" onclick="updateOrderStatus(${order.id})">Update</button>
-                        <button class="action-btn btn-delete" onclick="refundOrder(${order.id})">Refund</button>
-                    </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-        }
-
-        function populateServicesGrid(services) {
-            const grid = document.getElementById('servicesGrid');
-            grid.innerHTML = '';
-            
-            services.forEach(service => {
-                const card = document.createElement('div');
-                card.className = 'col-lg-4 col-md-6 mb-3';
-                card.innerHTML = `
-                    <div class="card h-100">
-                        <div class="card-body">
-                            <h6 class="card-title">${service.name}</h6>
-                            <p class="card-text">
-                                <small class="text-muted">Category: ${service.category}</small><br>
-                                <small class="text-muted">Rate: ${service.rate} VNĐ</small><br>
-                                <small class="text-muted">Min: ${service.min} - Max: ${service.max}</small>
-                            </p>
-                            <div class="d-flex justify-content-between align-items-center">
-                                <span class="badge bg-primary">${service.type}</span>
-                                ${service.refill ? '<span class="badge bg-success">Refill</span>' : ''}
-                            </div>
+<!-- Deposit Modal -->
+<div class="modal fade" id="depositModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Nạp tiền vào tài khoản</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="deposit-form">
+                    <div class="form-group">
+                        <label>Phương thức thanh toán</label>
+                        <select class="form-control" id="payment-method" required>
+                            <option value="">-- Chọn phương thức --</option>
+                            <option value="vnpay">💳 VNPay</option>
+                            <option value="momo">📱 Momo</option>
+                            <option value="banking">🏦 Chuyển khoản ngân hàng</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Số tiền nạp</label>
+                        <input type="number" class="form-control" id="deposit-amount" placeholder="Nhập số tiền" min="10000" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Gợi ý</label>
+                        <div class="amount-suggestions">
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(50000)">50,000đ</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(100000)">100,000đ</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(200000)">200,000đ</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" onclick="setAmount(500000)">500,000đ</button>
                         </div>
                     </div>
-                `;
-                grid.appendChild(card);
-            });
-        }
-
-        function populateTransactionsTable(transactions) {
-            const tbody = document.querySelector('#transactionsTable tbody');
-                tbody.innerHTML = '';
-            
-            transactions.forEach(transaction => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${transaction.id}</td>
-                    <td>${transaction.user_email}</td>
-                    <td><span class="badge bg-info">${transaction.type}</span></td>
-                    <td>${formatCurrency(transaction.amount)}</td>
-                    <td>${formatCurrency(transaction.balance_before)}</td>
-                    <td>${formatCurrency(transaction.balance_after)}</td>
-                    <td>${formatDate(transaction.created_at)}</td>
-                    `;
-                    tbody.appendChild(row);
-                });
-        }
-
-        // Chart functions
-        function initializeCharts() {
-            try {
-                console.log('Initializing charts...');
-                
-                // Revenue Chart
-                const revenueCtx = document.getElementById('revenueChart');
-                if (!revenueCtx) {
-                    console.error('Revenue chart canvas not found');
-                    return;
-                }
-                
-                charts.revenue = new Chart(revenueCtx, {
-                    type: 'line',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'Revenue (VNĐ)',
-                            data: [],
-                            borderColor: 'rgb(75, 192, 192)',
-                            backgroundColor: 'rgba(75, 192, 192, 0.2)',
-                            tension: 0.1,
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    callback: function(value) {
-                                        return value.toLocaleString('vi-VN') + ' VNĐ';
-                                    }
-                                }
-                            },
-                            x: {
-                                ticks: {
-                                    maxTicksLimit: 10
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top'
-                            }
-                        }
-                    }
-                });
-
-                // Orders Chart
-                const ordersCtx = document.getElementById('ordersChart');
-                if (!ordersCtx) {
-                    console.error('Orders chart canvas not found');
-                    return;
-                }
-                
-                charts.orders = new Chart(ordersCtx, {
-                    type: 'bar',
-                    data: {
-                        labels: [],
-                        datasets: [{
-                            label: 'Orders',
-                            data: [],
-                            backgroundColor: [
-                                'rgba(255, 99, 132, 0.8)',
-                                'rgba(54, 162, 235, 0.8)',
-                                'rgba(255, 205, 86, 0.8)',
-                                'rgba(75, 192, 192, 0.8)',
-                                'rgba(153, 102, 255, 0.8)'
-                            ],
-                            borderColor: [
-                                'rgba(255, 99, 132, 1)',
-                                'rgba(54, 162, 235, 1)',
-                                'rgba(255, 205, 86, 1)',
-                                'rgba(75, 192, 192, 1)',
-                                'rgba(153, 102, 255, 1)'
-                            ],
-                            borderWidth: 1
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            y: {
-                                beginAtZero: true,
-                                ticks: {
-                                    stepSize: 1
-                                }
-                            }
-                        },
-                        plugins: {
-                            legend: {
-                                display: true,
-                                position: 'top'
-                            }
-                        }
-                    }
-                });
-                
-                console.log('Charts initialized successfully');
-            } catch (error) {
-                console.error('Error initializing charts:', error);
-                showErrorDetails(error, 'Chart Initialization');
-            }
-        }
-
-        function updateCharts(stats) {
-            try {
-                console.log('Updating charts with data:', stats);
-                
-                // Update revenue chart with sample data
-                const revenueLabels = [];
-                const revenueData = [];
-                for (let i = 29; i >= 0; i--) {
-                    const date = new Date();
-                    date.setDate(date.getDate() - i);
-                    revenueLabels.push(date.toLocaleDateString('vi-VN', { month: 'short', day: 'numeric' }));
-                    revenueData.push(Math.floor(Math.random() * 10000000) + 1000000);
-                }
-                
-                if (charts.revenue) {
-                    charts.revenue.data.labels = revenueLabels;
-                    charts.revenue.data.datasets[0].data = revenueData;
-                    charts.revenue.update();
-                    console.log('Revenue chart updated');
-                }
-
-                // Update orders chart with sample data
-                const serviceLabels = ['YouTube', 'TikTok', 'Facebook', 'Instagram', 'Twitter'];
-                const orderData = [45, 32, 28, 15, 8];
-                
-                if (charts.orders) {
-                    charts.orders.data.labels = serviceLabels;
-                    charts.orders.data.datasets[0].data = orderData;
-                    charts.orders.update();
-                    console.log('Orders chart updated');
-                }
-                
-                console.log('Charts updated successfully');
-            } catch (error) {
-                console.error('Error updating charts:', error);
-                showErrorDetails(error, 'Chart Update');
-            }
-        }
-
-        // Action functions
-        function viewUser(userId) {
-            // Load user details and show modal
-            showToast('Loading user details...', 'info');
-            // Implementation for user detail modal
-        }
-
-        function banUser(userId) {
-            if (confirm('Are you sure you want to ban this user?')) {
-                showToast('User banned successfully', 'success');
-                loadUsersData();
-            }
-        }
-
-        function unbanUser(userId) {
-            if (confirm('Are you sure you want to unban this user?')) {
-                showToast('User unbanned successfully', 'success');
-                loadUsersData();
-            }
-        }
-
-        function viewOrder(orderId) {
-            // Load order details and show modal
-            showToast('Loading order details...', 'info');
-            // Implementation for order detail modal
-        }
-
-        function updateOrderStatus(orderId) {
-            showToast('Order status updated', 'success');
-            loadOrdersData();
-        }
-
-        function refundOrder(orderId) {
-            if (confirm('Are you sure you want to refund this order?')) {
-                showToast('Order refunded successfully', 'success');
-                loadOrdersData();
-            }
-        }
-
-        function syncServices() {
-            showToast('Syncing services from BUMX API...', 'info');
-            // Implementation for service sync
-            setTimeout(() => {
-                showToast('Services synced successfully', 'success');
-                document.getElementById('lastSyncTime').textContent = `Last sync: ${new Date().toLocaleString('vi-VN')}`;
-                loadServicesData();
-            }, 2000);
-        }
-
-        function saveApiConfig(e) {
-            e.preventDefault();
-            showToast('API configuration saved', 'success');
-        }
-
-        // Export functions
-        function exportUsers() {
-            showToast('Exporting users to CSV...', 'info');
-            // Implementation for CSV export
-        }
-
-        function exportOrders() {
-            showToast('Exporting orders to CSV...', 'info');
-            // Implementation for CSV export
-        }
-
-        function exportTransactions() {
-            showToast('Exporting transactions to CSV...', 'info');
-            // Implementation for CSV export
-        }
-
-        // Utility functions
-        function formatCurrency(amount) {
-            return new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND'
-            }).format(amount);
-        }
-
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('vi-VN');
-        }
-
-        function showLoading(sectionId) {
-            const section = document.getElementById(sectionId);
-            const loadingDiv = document.createElement('div');
-            loadingDiv.className = 'loading';
-            loadingDiv.innerHTML = '<div class="spinner"></div>';
-            loadingDiv.id = 'loading-' + sectionId;
-            section.appendChild(loadingDiv);
-        }
-
-        function hideLoading(sectionId) {
-            const loadingDiv = document.getElementById('loading-' + sectionId);
-            if (loadingDiv) {
-                loadingDiv.remove();
-            }
-        }
-
-        function showToast(message, type = 'info') {
-            const toastContainer = document.querySelector('.toast-container');
-            const toast = document.createElement('div');
-            toast.className = `toast align-items-center text-white bg-${type === 'error' ? 'danger' : type} border-0`;
-            toast.setAttribute('role', 'alert');
-            toast.innerHTML = `
-                <div class="d-flex">
-                    <div class="toast-body">${message}</div>
-                    <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
-                </div>
-            `;
-            
-            toastContainer.appendChild(toast);
-            const bsToast = new bootstrap.Toast(toast);
-            bsToast.show();
-            
-            // Remove toast element after it's hidden
-            toast.addEventListener('hidden.bs.toast', () => {
-                toast.remove();
-            });
-        }
-
-        function showErrorDetails(error, context = '') {
-            console.error(`${context}:`, error);
-            
-            // Show detailed error in toast
-            let errorMessage = error.message || error.toString();
-            if (error.stack) {
-                errorMessage += `\n\nStack: ${error.stack}`;
-            }
-            
-            showToast(`${context}: ${errorMessage}`, 'error');
-            
-            // Also log to a visible error log area
-            const errorLog = document.getElementById('errorLog');
-            if (errorLog) {
-                const timestamp = new Date().toLocaleString();
-                errorLog.innerHTML += `
-                    <div class="alert alert-danger">
-                        <strong>[${timestamp}] ${context}</strong><br>
-                        <code>${errorMessage}</code>
+                    <div class="alert alert-warning">
+                        <i class="fas fa-exclamation-triangle"></i> Phí giao dịch: <strong>0%</strong>
                     </div>
-                `;
-                errorLog.scrollTop = errorLog.scrollHeight;
-            }
-        }
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Hủy</button>
+                <button type="button" class="btn btn-success" onclick="submitDeposit()"><i class="fas fa-money-bill-wave"></i> Nạp tiền</button>
+            </div>
+        </div>
+    </div>
+</div>
 
-        function clearErrorLog() {
-            const errorLog = document.getElementById('errorLog');
-            if (errorLog) {
-                errorLog.innerHTML = '<div class="text-muted">No errors logged yet...</div>';
-            }
-        }
-    </script>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="app.js"></script>
+
 </body>
 </html>

@@ -1,11 +1,5 @@
 // SMM Panel User Frontend - JavaScript
 
-// API Configuration
-const API_CONFIG = {
-    baseURL: 'https://social.homemmo.store/api',
-    timeout: 10000
-};
-
 // Mock Data
 const MOCK_USER = {
   username: "dungnv933",
@@ -24,7 +18,7 @@ const SERVICES_DATA = [
     icon: '👍',
     description: 'Sử dụng tốt',
     category: 'Facebook',
-    rate: 500,  // Updated to match price
+    rate: 2.5,
     min: 100,
     max: 10000
   },
@@ -34,98 +28,8 @@ const SERVICES_DATA = [
     icon: '📊',
     description: 'Sử dụng tốt',
     category: 'Facebook',
-    rate: 800,  // Updated to match price
+    rate: 3.0,
     min: 50,
-    max: 5000
-  },
-  {
-    id: 'fb-comment',
-    name: 'Tăng Comment FB',
-    icon: '💬',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 1000,
-    min: 10,
-    max: 1000
-  },
-  {
-    id: 'fb-like-comment',
-    name: 'Tăng Like cho Bình luận',
-    icon: '👍',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 400,
-    min: 10,
-    max: 500
-  },
-  {
-    id: 'fb-livestream',
-    name: 'Tăng mắt LiveStream',
-    icon: '👁️',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 100,
-    min: 100,
-    max: 10000
-  },
-  {
-    id: 'fb-follow',
-    name: 'Tăng Follow FB có nhận',
-    icon: '➕',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 1000,
-    min: 100,
-    max: 5000
-  },
-  {
-    id: 'fb-fanpage',
-    name: 'Tăng Like, follow Fanpage',
-    icon: '📱',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 5000,
-    min: 100,
-    max: 10000
-  },
-  {
-    id: 'fb-group',
-    name: 'Tăng member Group',
-    icon: '👥',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 3000,
-    min: 100,
-    max: 10000
-  },
-  {
-    id: 'fb-video',
-    name: 'Tăng view Video FB',
-    icon: '🎥',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 300,
-    min: 100,
-    max: 10000
-  },
-  {
-    id: 'fb-rating',
-    name: 'Tăng đánh giá Fanpage',
-    icon: '⭐',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 2000,
-    min: 5,
-    max: 500
-  },
-  {
-    id: 'fb-viplike',
-    name: 'VipLike - Like thẳng',
-    icon: '💎',
-    description: 'Sử dụng tốt',
-    category: 'Facebook',
-    rate: 1000,
-    min: 100,
     max: 5000
   },
   {
