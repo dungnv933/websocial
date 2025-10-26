@@ -759,6 +759,90 @@ function filterUsers() {
     updateUsersTable(filteredUsers);
 }
 
+// Add Service functions
+function addService() {
+    console.log('Opening Add Service modal...');
+    showModal('addServiceModal');
+}
+
+function submitAddService() {
+    const serviceName = document.getElementById('addServiceName').value;
+    const serviceCategory = document.getElementById('addServiceCategory').value;
+    const serviceType = document.getElementById('addServiceType').value;
+    const serviceAPIProvider = document.getElementById('addServiceAPIProvider').value;
+    const serviceRate = document.getElementById('addServiceRate').value;
+    const serviceMin = document.getElementById('addServiceMin').value;
+    const serviceMax = document.getElementById('addServiceMax').value;
+    const serviceDescription = document.getElementById('addServiceDescription').value;
+    const serviceActive = document.getElementById('addServiceActive').checked;
+    
+    if (!serviceName || !serviceCategory || !serviceRate || !serviceMin || !serviceMax) {
+        showError('Please fill in all required fields');
+        return;
+    }
+    
+    console.log('Adding service:', { 
+        serviceName, serviceCategory, serviceType, serviceAPIProvider, 
+        serviceRate, serviceMin, serviceMax, serviceDescription, serviceActive 
+    });
+    
+    // Simulate API call
+    setTimeout(() => {
+        showSuccess('Service added successfully!');
+        hideModal('addServiceModal');
+        
+        // Clear form
+        document.getElementById('addServiceName').value = '';
+        document.getElementById('addServiceCategory').value = '';
+        document.getElementById('addServiceType').value = '';
+        document.getElementById('addServiceAPIProvider').value = '';
+        document.getElementById('addServiceRate').value = '';
+        document.getElementById('addServiceMin').value = '';
+        document.getElementById('addServiceMax').value = '';
+        document.getElementById('addServiceDescription').value = '';
+        document.getElementById('addServiceActive').checked = true;
+        
+        // Refresh services table
+        loadServicesData();
+    }, 1000);
+}
+
+// Other service functions
+function showImportModal() {
+    console.log('Opening Import Services modal...');
+    showModal('importServicesModal');
+}
+
+function syncAllServices() {
+    console.log('Syncing all services...');
+    showSuccess('Syncing all services...');
+    // TODO: Implement sync all services
+}
+
+function filterServices() {
+    const searchTerm = document.getElementById('service-search')?.value.toLowerCase() || '';
+    const categoryFilter = document.getElementById('service-category-filter')?.value || 'all';
+    
+    console.log('Filtering services:', { searchTerm, categoryFilter });
+    
+    // Filter services based on search and category
+    let filteredServices = MOCK_DATA.services;
+    
+    if (searchTerm) {
+        filteredServices = filteredServices.filter(service => 
+            service.name.toLowerCase().includes(searchTerm)
+        );
+    }
+    
+    if (categoryFilter !== 'all') {
+        filteredServices = filteredServices.filter(service => 
+            service.category.toLowerCase() === categoryFilter.toLowerCase()
+        );
+    }
+    
+    updateServicesTable(filteredServices);
+}
+
 // Export functions for global access
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
@@ -777,3 +861,8 @@ window.addUser = addUser;
 window.submitAddUser = submitAddUser;
 window.exportUsers = exportUsers;
 window.filterUsers = filterUsers;
+window.addService = addService;
+window.submitAddService = submitAddService;
+window.showImportModal = showImportModal;
+window.syncAllServices = syncAllServices;
+window.filterServices = filterServices;

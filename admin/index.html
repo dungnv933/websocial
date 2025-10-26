@@ -263,7 +263,7 @@
             <div class="card">
                 <div class="card-header">
                     <div class="table-actions">
-                        <button class="btn btn-primary" onclick="showAddServiceModal()"><i class="fas fa-plus"></i> Add Service</button>
+                        <button class="btn btn-primary" onclick="addService()"><i class="fas fa-plus"></i> Add Service</button>
                         <button class="btn btn-info" onclick="showImportModal()"><i class="fas fa-download"></i> Import from API</button>
                         <button class="btn btn-success" onclick="syncAllServices()"><i class="fas fa-sync"></i> Sync All</button>
                     </div>
@@ -785,7 +785,7 @@
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
-                <button type="button" class="btn btn-primary" onclick="addService()">Add Service</button>
+                <button type="button" class="btn btn-primary" onclick="submitAddService()">Add Service</button>
             </div>
         </div>
     </div>
@@ -892,7 +892,7 @@
 </div>
 
 <!-- Import Services Modal -->
-<div class="modal fade" id="importModal" tabindex="-1">
+<div class="modal fade" id="importServicesModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
