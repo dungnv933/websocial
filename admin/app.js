@@ -11,6 +11,51 @@ const API_CONFIG = {
     timeout: 10000
 };
 
+// Mock Data
+const MOCK_DATA = {
+    stats: {
+        totalUsers: 1234,
+        totalOrders: 5678,
+        totalRevenue: 123456789,
+        apiStatus: 'Online'
+    },
+    recentOrders: [
+        { id: 'ORD-001', user_email: 'dungnv933@gmail.com', service_name: 'Tăng Like Facebook', price: 2500, status: 'Completed' },
+        { id: 'ORD-002', user_email: 'testuser@gmail.com', service_name: 'Tăng Follow TikTok', price: 50000, status: 'In Progress' },
+        { id: 'ORD-003', user_email: 'user123@gmail.com', service_name: 'Tăng View YouTube', price: 25000, status: 'Completed' },
+        { id: 'ORD-004', user_email: 'vipuser@gmail.com', service_name: 'Tăng Like Instagram', price: 40000, status: 'Pending' },
+        { id: 'ORD-005', user_email: 'newuser@gmail.com', service_name: 'Tăng Comment Facebook', price: 15000, status: 'Failed' }
+    ],
+    recentUsers: [
+        { email: 'dungnv933@gmail.com', balance: 2390000, created_at: '2025-10-20T10:30:00Z' },
+        { email: 'testuser@gmail.com', balance: 0, created_at: '2025-10-19T15:45:00Z' },
+        { email: 'user123@gmail.com', balance: 150000, created_at: '2025-10-18T09:20:00Z' },
+        { email: 'vipuser@gmail.com', balance: 5000000, created_at: '2025-10-15T14:10:00Z' },
+        { email: 'newuser@gmail.com', balance: 100000, created_at: '2025-10-26T08:30:00Z' }
+    ],
+    users: [
+        { id: 1, email: 'dungnv933@gmail.com', balance: 2390000, total_spent: 150000, is_active: true, created_at: '2025-10-20T10:30:00Z' },
+        { id: 2, email: 'testuser@gmail.com', balance: 0, total_spent: 50000, is_active: true, created_at: '2025-10-19T15:45:00Z' },
+        { id: 3, email: 'user123@gmail.com', balance: 150000, total_spent: 25000, is_active: true, created_at: '2025-10-18T09:20:00Z' },
+        { id: 4, email: 'vipuser@gmail.com', balance: 5000000, total_spent: 500000, is_active: true, created_at: '2025-10-15T14:10:00Z' },
+        { id: 5, email: 'banneduser@gmail.com', balance: 0, total_spent: 0, is_active: false, created_at: '2025-10-10T12:00:00Z' }
+    ],
+    orders: [
+        { id: 1, user_email: 'dungnv933@gmail.com', service_name: 'Tăng Like Facebook', link: 'https://fb.com/post1', quantity: 100, price: 2500, status: 'Completed', created_at: '2025-10-26T10:30:00Z' },
+        { id: 2, user_email: 'testuser@gmail.com', service_name: 'Tăng Follow TikTok', link: 'https://tiktok.com/user1', quantity: 500, price: 50000, status: 'In Progress', created_at: '2025-10-26T09:15:00Z' },
+        { id: 3, user_email: 'user123@gmail.com', service_name: 'Tăng View YouTube', link: 'https://youtube.com/watch?v=123', quantity: 1000, price: 25000, status: 'Completed', created_at: '2025-10-25T16:45:00Z' },
+        { id: 4, user_email: 'vipuser@gmail.com', service_name: 'Tăng Like Instagram', link: 'https://instagram.com/p/abc123', quantity: 200, price: 40000, status: 'Pending', created_at: '2025-10-25T14:20:00Z' },
+        { id: 5, user_email: 'newuser@gmail.com', service_name: 'Tăng Comment Facebook', link: 'https://fb.com/post2', quantity: 50, price: 15000, status: 'Failed', created_at: '2025-10-24T11:30:00Z' }
+    ],
+    services: [
+        { id: 1, name: 'Tăng Like Facebook', category: 'Facebook', type: 'Default', rate: 25, min: 100, max: 10000, provider: 'BUMX API', status: 'Active' },
+        { id: 2, name: 'Tăng Follow TikTok', category: 'TikTok', type: 'Default', rate: 100, min: 50, max: 5000, provider: 'BUMX API', status: 'Active' },
+        { id: 3, name: 'Tăng View YouTube', category: 'YouTube', type: 'Default', rate: 25, min: 100, max: 50000, provider: 'BUMX API', status: 'Active' },
+        { id: 4, name: 'Tăng Like Instagram', category: 'Instagram', type: 'Default', rate: 200, min: 50, max: 2000, provider: 'BUMX API', status: 'Active' },
+        { id: 5, name: 'Tăng Comment Facebook', category: 'Facebook', type: 'Custom Comments', rate: 300, min: 10, max: 1000, provider: 'BUMX API', status: 'Active' }
+    ]
+};
+
 // Initialize the application
 document.addEventListener('DOMContentLoaded', function() {
     initializeApp();
@@ -141,21 +186,33 @@ async function loadDashboardData() {
     try {
         console.log('Loading dashboard data...');
         
-        // Load stats
-        const statsResponse = await fetch(`${API_CONFIG.baseURL}/admin/stats`);
-        const stats = await statsResponse.json();
+        let stats, ordersData, usersData;
+        
+        try {
+            // Try to load from API first
+            const statsResponse = await fetch(`${API_CONFIG.baseURL}/admin/stats`);
+            stats = await statsResponse.json();
+            
+            const ordersResponse = await fetch(`${API_CONFIG.baseURL}/admin/orders?limit=5`);
+            ordersData = await ordersResponse.json();
+            
+            const usersResponse = await fetch(`${API_CONFIG.baseURL}/admin/users?limit=5`);
+            usersData = await usersResponse.json();
+            
+            console.log('Data loaded from API');
+        } catch (apiError) {
+            console.log('API not available, using mock data');
+            // Use mock data if API fails
+            stats = MOCK_DATA.stats;
+            ordersData = { orders: MOCK_DATA.recentOrders };
+            usersData = { users: MOCK_DATA.recentUsers };
+        }
         
         // Update stats cards
         updateStatsCards(stats);
         
-        // Load recent orders
-        const ordersResponse = await fetch(`${API_CONFIG.baseURL}/admin/orders?limit=5`);
-        const ordersData = await ordersResponse.json();
+        // Update tables
         updateRecentOrdersTable(ordersData.orders || []);
-        
-        // Load recent users
-        const usersResponse = await fetch(`${API_CONFIG.baseURL}/admin/users?limit=5`);
-        const usersData = await usersResponse.json();
         updateRecentUsersTable(usersData.users || []);
         
         // Initialize charts
@@ -236,6 +293,104 @@ function updateRecentUsersTable(users) {
             <td>${user.email || 'Unknown'}</td>
             <td>${user.balance?.toLocaleString() || '0'}₫</td>
             <td>${formatDate(user.created_at)}</td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+// Table update functions
+function updateUsersTable(users) {
+    const tbody = document.querySelector('#usersTable tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (users.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted">No users found</td></tr>';
+        return;
+    }
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${user.id}</td>
+            <td>${user.email || 'Unknown'}</td>
+            <td>${user.balance?.toLocaleString() || '0'}₫</td>
+            <td>${user.total_spent?.toLocaleString() || '0'}₫</td>
+            <td><span class="badge badge-${user.is_active ? 'success' : 'danger'}">${user.is_active ? 'Active' : 'Banned'}</span></td>
+            <td>${formatDate(user.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editUser(${user.id})">Edit</button>
+                <button class="btn btn-sm btn-${user.is_active ? 'danger' : 'success'}" onclick="toggleUserStatus(${user.id})">
+                    ${user.is_active ? 'Ban' : 'Unban'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateOrdersTable(orders) {
+    const tbody = document.querySelector('#ordersTable tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (orders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No orders found</td></tr>';
+        return;
+    }
+    
+    orders.forEach(order => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${order.id}</td>
+            <td>${order.user_email || 'Unknown'}</td>
+            <td>${order.service_name || 'Unknown Service'}</td>
+            <td><a href="${order.link}" target="_blank" class="text-truncate" style="max-width: 100px; display: inline-block;">${order.link}</a></td>
+            <td>${order.quantity || 0}</td>
+            <td>${order.price?.toLocaleString() || '0'}₫</td>
+            <td><span class="badge badge-${getStatusClass(order.status)}">${order.status || 'Unknown'}</span></td>
+            <td>${formatDate(order.created_at)}</td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="viewOrder(${order.id})">View</button>
+                <button class="btn btn-sm btn-${order.status === 'Pending' ? 'success' : 'warning'}" onclick="updateOrderStatus(${order.id})">
+                    ${order.status === 'Pending' ? 'Process' : 'Update'}
+                </button>
+            </td>
+        `;
+        tbody.appendChild(row);
+    });
+}
+
+function updateServicesTable(services) {
+    const tbody = document.querySelector('#servicesTable tbody');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (services.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" class="text-center text-muted">No services found</td></tr>';
+        return;
+    }
+    
+    services.forEach(service => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${service.id}</td>
+            <td>${service.name || 'Unknown Service'}</td>
+            <td><span class="badge badge-primary">${service.category || 'Unknown'}</span></td>
+            <td>${service.type || 'Default'}</td>
+            <td>${service.rate?.toLocaleString() || '0'}₫</td>
+            <td>${service.min || 0} - ${service.max || 0}</td>
+            <td>${service.provider || 'Unknown'}</td>
+            <td><span class="badge badge-${service.status === 'Active' ? 'success' : 'danger'}">${service.status || 'Unknown'}</span></td>
+            <td>
+                <button class="btn btn-sm btn-primary" onclick="editService(${service.id})">Edit</button>
+                <button class="btn btn-sm btn-${service.status === 'Active' ? 'danger' : 'success'}" onclick="toggleServiceStatus(${service.id})">
+                    ${service.status === 'Active' ? 'Deactivate' : 'Activate'}
+                </button>
+            </td>
         `;
         tbody.appendChild(row);
     });
@@ -325,20 +480,68 @@ function initializeCharts(stats) {
     }
 }
 
-// Placeholder functions for other pages
+// Data loading functions for other pages
 async function loadUsersData() {
-    console.log('Loading users data...');
-    // TODO: Implement users data loading
+    try {
+        console.log('Loading users data...');
+        
+        let usersData;
+        try {
+            const response = await fetch(`${API_CONFIG.baseURL}/admin/users`);
+            usersData = await response.json();
+        } catch (apiError) {
+            console.log('API not available, using mock data for users');
+            usersData = { users: MOCK_DATA.users };
+        }
+        
+        updateUsersTable(usersData.users || []);
+        console.log('Users data loaded successfully');
+    } catch (error) {
+        console.error('Error loading users data:', error);
+        showError('Failed to load users data');
+    }
 }
 
 async function loadOrdersData() {
-    console.log('Loading orders data...');
-    // TODO: Implement orders data loading
+    try {
+        console.log('Loading orders data...');
+        
+        let ordersData;
+        try {
+            const response = await fetch(`${API_CONFIG.baseURL}/admin/orders`);
+            ordersData = await response.json();
+        } catch (apiError) {
+            console.log('API not available, using mock data for orders');
+            ordersData = { orders: MOCK_DATA.orders };
+        }
+        
+        updateOrdersTable(ordersData.orders || []);
+        console.log('Orders data loaded successfully');
+    } catch (error) {
+        console.error('Error loading orders data:', error);
+        showError('Failed to load orders data');
+    }
 }
 
 async function loadServicesData() {
-    console.log('Loading services data...');
-    // TODO: Implement services data loading
+    try {
+        console.log('Loading services data...');
+        
+        let servicesData;
+        try {
+            const response = await fetch(`${API_CONFIG.baseURL}/services`);
+            servicesData = await response.json();
+        } catch (apiError) {
+            console.log('API not available, using mock data for services');
+            servicesData = { services: MOCK_DATA.services };
+        }
+        
+        updateServicesTable(servicesData.services || []);
+        console.log('Services data loaded successfully');
+    } catch (error) {
+        console.error('Error loading services data:', error);
+        showError('Failed to load services data');
+    }
 }
 
 async function loadApiProvidersData() {
@@ -412,8 +615,51 @@ function showSuccess(message) {
     alert(`Success: ${message}`);
 }
 
+// Action functions
+function editUser(userId) {
+    console.log(`Editing user: ${userId}`);
+    // TODO: Implement edit user modal
+    alert(`Edit user ${userId} - Feature coming soon!`);
+}
+
+function toggleUserStatus(userId) {
+    console.log(`Toggling user status: ${userId}`);
+    // TODO: Implement toggle user status
+    alert(`Toggle user status ${userId} - Feature coming soon!`);
+}
+
+function viewOrder(orderId) {
+    console.log(`Viewing order: ${orderId}`);
+    // TODO: Implement view order modal
+    alert(`View order ${orderId} - Feature coming soon!`);
+}
+
+function updateOrderStatus(orderId) {
+    console.log(`Updating order status: ${orderId}`);
+    // TODO: Implement update order status
+    alert(`Update order status ${orderId} - Feature coming soon!`);
+}
+
+function editService(serviceId) {
+    console.log(`Editing service: ${serviceId}`);
+    // TODO: Implement edit service modal
+    alert(`Edit service ${serviceId} - Feature coming soon!`);
+}
+
+function toggleServiceStatus(serviceId) {
+    console.log(`Toggling service status: ${serviceId}`);
+    // TODO: Implement toggle service status
+    alert(`Toggle service status ${serviceId} - Feature coming soon!`);
+}
+
 // Export functions for global access
 window.showPage = showPage;
 window.toggleSidebar = toggleSidebar;
 window.showNotifications = showNotifications;
 window.toggleAdminDropdown = toggleAdminDropdown;
+window.editUser = editUser;
+window.toggleUserStatus = toggleUserStatus;
+window.viewOrder = viewOrder;
+window.updateOrderStatus = updateOrderStatus;
+window.editService = editService;
+window.toggleServiceStatus = toggleServiceStatus;
