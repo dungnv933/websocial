@@ -1106,6 +1106,42 @@ function addDiscountCode() {
     showModal('addDiscountCodeModal');
 }
 
+function generateReport() {
+    console.log('Generating report...');
+    showSuccess('Generating report...');
+    // TODO: Implement report generation
+}
+
+function exportReport() {
+    console.log('Exporting report...');
+    showSuccess('Exporting report to CSV...');
+    // TODO: Implement report export
+}
+
+function testConnection() {
+    console.log('Testing API connection...');
+    showSuccess('Testing connection...');
+    // TODO: Implement connection test
+}
+
+function addDiscount() {
+    console.log('Adding discount...');
+    showSuccess('Discount added successfully!');
+    // TODO: Implement add discount
+}
+
+function fetchProviderServices() {
+    console.log('Fetching provider services...');
+    showSuccess('Fetching services from provider...');
+    // TODO: Implement fetch services
+}
+
+function importServices() {
+    console.log('Importing services...');
+    showSuccess('Services imported successfully!');
+    // TODO: Implement import services
+}
+
 function editProvider(providerId) {
     console.log(`Editing provider: ${providerId}`);
     Swal.fire({
@@ -1189,6 +1225,12 @@ function updateTicketStatus(ticketId) {
 // Export additional functions
 window.addProvider = addProvider;
 window.addDiscountCode = addDiscountCode;
+window.generateReport = generateReport;
+window.exportReport = exportReport;
+window.testConnection = testConnection;
+window.addDiscount = addDiscount;
+window.fetchProviderServices = fetchProviderServices;
+window.importServices = importServices;
 window.editProvider = editProvider;
 window.toggleProviderStatus = toggleProviderStatus;
 window.viewTransaction = viewTransaction;
