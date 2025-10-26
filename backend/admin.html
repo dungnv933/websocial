@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SMM Panel Admin - Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        
+        .header h1 {
+            color: #2c3e50;
+            font-size: 2.5em;
+            margin-bottom: 10px;
+        }
+        
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.2em;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .stat-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .stat-card h3 {
+            color: #2c3e50;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card p {
+            color: #7f8c8d;
+            font-size: 1.1em;
+        }
+        
+        .admin-panel {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .admin-panel h2 {
+            color: #2c3e50;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1em;
+            margin: 5px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .btn-success {
+            background: linear-gradient(45deg, #56ab2f, #a8e6cf);
+        }
+        
+        .btn-info {
+            background: linear-gradient(45deg, #3498db, #85c1e9);
+        }
+        
+        .btn-warning {
+            background: linear-gradient(45deg, #f39c12, #f7dc6f);
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #e74c3c, #f1948a);
+        }
+        
+        .api-section {
+            margin: 20px 0;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .api-section h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .api-endpoint {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+        
+        .method {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8em;
+            margin-right: 10px;
+        }
+        
+        .method.get { background: #d4edda; color: #155724; }
+        .method.post { background: #cce5ff; color: #004085; }
+        .method.put { background: #fff3cd; color: #856404; }
+        .method.delete { background: #f8d7da; color: #721c24; }
+        
+        .status-indicator {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            margin-right: 8px;
+        }
+        
+        .status-online { background: #28a745; }
+        .status-offline { background: #dc3545; }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .response {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 5px;
+            padding: 15px;
+            margin-top: 10px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 SMM Panel Admin Dashboard</h1>
+            <p>Quản lý hệ thống SMM Panel - Social Media Marketing Platform</p>
+        </div>
+        
+        <div class="stats-grid">
+            <div class="stat-card">
+                <h3 id="total-users">-</h3>
+                <p>Tổng Users</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-orders">-</h3>
+                <p>Tổng Orders</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="total-revenue">-</h3>
+                <p>Doanh Thu (VNĐ)</p>
+            </div>
+            <div class="stat-card">
+                <h3 id="api-status">
+                    <span class="status-indicator status-offline"></span>
+                    Offline
+                </h3>
+                <p>API Status</p>
+            </div>
+        </div>
+        
+        <div class="admin-panel">
+            <h2>🔧 Admin Controls</h2>
+            
+            <div class="api-section">
+                <h3>📊 Thống Kê Hệ Thống</h3>
+                <button class="btn btn-info" onclick="loadStats()">Tải Thống Kê</button>
+                <button class="btn btn-success" onclick="testAPI()">Test API</button>
+                <div class="loading" id="loading">
+                    <div class="spinner"></div>
+                    <p>Đang tải...</p>
+                </div>
+            </div>
+            
+            <div class="api-section">
+                <h3>🔗 API Endpoints</h3>
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/api/services</strong> - Danh sách dịch vụ BUMX
+                    <button class="btn btn-info" onclick="callAPI('GET', '/api/services')">Test</button>
+                </div>
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/api/balance</strong> - Xem số dư
+                    <button class="btn btn-info" onclick="callAPI('GET', '/api/balance')">Test</button>
+                </div>
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/api/orders/history</strong> - Lịch sử đơn hàng
+                    <button class="btn btn-info" onclick="callAPI('GET', '/api/orders/history')">Test</button>
+                </div>
+                <div class="api-endpoint">
+                    <span class="method get">GET</span>
+                    <strong>/api/promotions</strong> - Danh sách khuyến mãi
+                    <button class="btn btn-info" onclick="callAPI('GET', '/api/promotions')">Test</button>
+                </div>
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/api/auth/register</strong> - Đăng ký user
+                    <button class="btn btn-warning" onclick="testRegister()">Test</button>
+                </div>
+                <div class="api-endpoint">
+                    <span class="method post">POST</span>
+                    <strong>/api/balance/deposit</strong> - Nạp tiền
+                    <button class="btn btn-warning" onclick="testDeposit()">Test</button>
+                </div>
+            </div>
+            
+            <div class="api-section">
+                <h3>📝 Response</h3>
+                <div id="response" class="response" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = window.location.origin;
+        
+        // Check API status on load
+        window.onload = function() {
+            checkAPIStatus();
+        };
+        
+        async function checkAPIStatus() {
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    document.getElementById('api-status').innerHTML = 
+                        '<span class="status-indicator status-online"></span>Online';
+                } else {
+                    throw new Error('API not responding');
+                }
+            } catch (error) {
+                document.getElementById('api-status').innerHTML = 
+                    '<span class="status-indicator status-offline"></span>Offline';
+            }
+        }
+        
+        async function loadStats() {
+            showLoading(true);
+            try {
+                // Mock data for now - replace with actual API calls
+                document.getElementById('total-users').textContent = '1,234';
+                document.getElementById('total-orders').textContent = '5,678';
+                document.getElementById('total-revenue').textContent = '12,345,678';
+                
+                showResponse('Thống kê đã được tải thành công!');
+            } catch (error) {
+                showResponse('Lỗi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function testAPI() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                const data = await response.json();
+                showResponse(JSON.stringify(data, null, 2));
+            } catch (error) {
+                showResponse('Lỗi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function callAPI(method, endpoint) {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}${endpoint}`, {
+                    method: method,
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                const data = await response.json();
+                showResponse(JSON.stringify(data, null, 2));
+            } catch (error) {
+                showResponse('Lỗi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function testRegister() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/api/auth/register`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@test.com',
+                        password: 'admin123'
+                    })
+                });
+                const data = await response.json();
+                showResponse(JSON.stringify(data, null, 2));
+            } catch (error) {
+                showResponse('Lỗi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        async function testDeposit() {
+            showLoading(true);
+            try {
+                const response = await fetch(`${API_BASE}/api/balance/deposit`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: 100000
+                    })
+                });
+                const data = await response.json();
+                showResponse(JSON.stringify(data, null, 2));
+            } catch (error) {
+                showResponse('Lỗi: ' + error.message);
+            } finally {
+                showLoading(false);
+            }
+        }
+        
+        function showLoading(show) {
+            document.getElementById('loading').style.display = show ? 'block' : 'none';
+        }
+        
+        function showResponse(data) {
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = data;
+            responseDiv.style.display = 'block';
+        }
+    </script>
+</body>
+</html>

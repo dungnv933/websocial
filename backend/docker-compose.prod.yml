@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:15-alpine
+    container_name: smmpanel_db
+    environment:
+      POSTGRES_USER: smmpanel_user
+      POSTGRES_PASSWORD: your_secure_password
+      POSTGRES_DB: smmpanel_db
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smmpanel_user -d smmpanel_db"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - smm_network
+
+  redis:
+    image: redis:7-alpine
+    container_name: smmpanel_redis
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+    networks:
+      - smm_network
+
+  backend:
+    build: .
+    container_name: smmpanel_backend
+    command: gunicorn app.main:app -w 4 -k uvicorn.workers.UvicornWorker --bind 0.0.0.0:8000
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - smm_network
+
+  nginx:
+    image: nginx:alpine
+    container_name: smmpanel_nginx
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+    depends_on:
+      - backend
+    restart: unless-stopped
+    networks:
+      - smm_network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  smm_network:
+    driver: bridge
