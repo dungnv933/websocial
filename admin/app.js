@@ -1096,6 +1096,16 @@ window.syncAllServices = syncAllServices;
 window.filterServices = filterServices;
 
 // Action functions for other pages
+function addProvider() {
+    console.log('Opening Add Provider modal...');
+    showModal('addApiProviderModal');
+}
+
+function addDiscountCode() {
+    console.log('Opening Add Discount Code modal...');
+    showModal('addDiscountCodeModal');
+}
+
 function editProvider(providerId) {
     console.log(`Editing provider: ${providerId}`);
     Swal.fire({
@@ -1177,6 +1187,8 @@ function updateTicketStatus(ticketId) {
 }
 
 // Export additional functions
+window.addProvider = addProvider;
+window.addDiscountCode = addDiscountCode;
 window.editProvider = editProvider;
 window.toggleProviderStatus = toggleProviderStatus;
 window.viewTransaction = viewTransaction;
