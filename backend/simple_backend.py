@@ -1,10 +1,11 @@
+# -*- coding: utf-8 -*-
 """
 Simple FastAPI Backend for SMM Panel
 Compatible with Python 3.6 and existing packages
 """
 import logging
 import uvicorn
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel
@@ -12,34 +13,34 @@ import sqlite3
 import json
 from datetime import datetime
 from typing import Optional, List
+import httpx
+from services_manager import service_manager
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Create FastAPI app
-app = FastAPI(
-    title="SMM Panel API",
-    description="Social Media Marketing Panel Backend API",
-    version="1.0.0"
-)
+# Initialize FastAPI app
+app = FastAPI(title="SMM Panel API", version="1.0.0")
 
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["https://social.homemmo.store", "http://localhost", "*"],
+    allow_origins=["*"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Database setup
+# Database path
+DB_PATH = "smm_panel.db"
+
 def init_db():
-    """Initialize SQLite database"""
-    conn = sqlite3.connect('smm_panel.db')
+    """Initialize SQLite database with required tables"""
+    conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
     
-    # Create users table
+    # Users table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -49,7 +50,7 @@ def init_db():
             balance REAL DEFAULT 0,
             total_spent REAL DEFAULT 0,
             tier_level INTEGER DEFAULT 1,
-            tier_name TEXT DEFAULT 'Cấp 1',
+            tier_name TEXT DEFAULT 'Cap 1',
             tier_discount REAL DEFAULT 0,
             referral_code TEXT UNIQUE,
             referred_by_code TEXT,
@@ -59,24 +60,7 @@ def init_db():
         )
     ''')
     
-    # Create services table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS services (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            category TEXT NOT NULL,
-            rate REAL NOT NULL,
-            min_quantity INTEGER DEFAULT 1,
-            max_quantity INTEGER DEFAULT 10000,
-            provider TEXT DEFAULT 'BUMX',
-            provider_service_id TEXT,
-            description TEXT,
-            status TEXT DEFAULT 'active',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-        )
-    ''')
-    
-    # Create orders table
+    # Orders table
     cursor.execute('''
         CREATE TABLE IF NOT EXISTS orders (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -85,43 +69,11 @@ def init_db():
             link TEXT NOT NULL,
             quantity INTEGER NOT NULL,
             charge REAL NOT NULL,
-            start_count INTEGER,
-            remains INTEGER,
             status TEXT DEFAULT 'pending',
-            bumx_order_id TEXT,
+            start_count INTEGER DEFAULT 0,
+            remains INTEGER DEFAULT 0,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id),
-            FOREIGN KEY (service_id) REFERENCES services (id)
-        )
-    ''')
-    
-    # Create transactions table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS transactions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            type TEXT NOT NULL,
-            amount REAL NOT NULL,
-            balance_before REAL NOT NULL,
-            balance_after REAL NOT NULL,
-            description TEXT,
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users (id)
-        )
-    ''')
-    
-    # Create deposits table
-    cursor.execute('''
-        CREATE TABLE IF NOT EXISTS deposits (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            amount REAL NOT NULL,
-            method TEXT DEFAULT 'bank_transfer',
-            bank_name TEXT DEFAULT 'ACB',
-            transaction_id TEXT,
-            status TEXT DEFAULT 'pending',
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_id) REFERENCES users (id)
         )
     ''')
@@ -131,251 +83,263 @@ def init_db():
 
 # Pydantic models
 class UserCreate(BaseModel):
-    username: str
-    email: str
-    password: str
-    referral_code: Optional[str] = None
+    username = str
+    email = str
+    password = str
+    referral_code = str
 
 class UserLogin(BaseModel):
-    username: str
-    password: str
+    username = str
+    password = str
 
 class OrderCreate(BaseModel):
-    service_id: int
-    link: str
-    quantity: int
+    service_id = int
+    link = str
+    quantity = int
 
 # Initialize database
 init_db()
 
 # API Endpoints
-@app.get("/")
-async def root():
-    """Root endpoint"""
-    return {"message": "SMM Panel API", "version": "1.0.0"}
 
-@app.get("/health")
-async def health_check():
-    """Health check endpoint"""
-    return {"status": "healthy", "service": "SMM Panel Backend", "timestamp": datetime.now().isoformat()}
+@app.get("/")
+def root():
+    """Root endpoint"""
+    return {"message": "SMM Panel API", "status": "running"}
 
 @app.get("/api/health")
-async def api_health():
-    """API health check"""
-    return {"status": "ok", "message": "API is running"}
+def health_check():
+    """Health check endpoint"""
+    return {"status": "healthy", "timestamp": datetime.now().isoformat()}
 
-# Auth endpoints
-@app.post("/api/auth/register")
-async def register(user: UserCreate):
-    """Register new user"""
-    conn = sqlite3.connect('smm_panel.db')
-    cursor = conn.cursor()
-    
-    try:
-        # Simple password hash (in production, use proper hashing)
-        password_hash = user.password  # TODO: Use proper hashing
-        
-        cursor.execute('''
-            INSERT INTO users (username, email, password_hash, referral_code)
-            VALUES (?, ?, ?, ?)
-        ''', (user.username, user.email, password_hash, user.referral_code))
-        
-        conn.commit()
-        user_id = cursor.lastrowid
-        
-        return {"message": "User registered successfully", "user_id": user_id}
-    except sqlite3.IntegrityError as e:
-        raise HTTPException(status_code=400, detail="Username or email already exists")
-    finally:
-        conn.close()
-
-@app.post("/api/auth/login")
-async def login(user: UserLogin):
-    """Login user"""
-    conn = sqlite3.connect('smm_panel.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('''
-        SELECT id, username, email, balance, total_spent, tier_level, tier_name
-        FROM users WHERE username = ? AND password_hash = ?
-    ''', (user.username, user.password))
-    
-    user_data = cursor.fetchone()
-    conn.close()
-    
-    if not user_data:
-        raise HTTPException(status_code=401, detail="Invalid credentials")
-    
-    # Simple JWT token (in production, use proper JWT)
-    token = f"fake-jwt-token-{user_data[0]}"
-    
-    return {
-        "access_token": token,
-        "token_type": "bearer",
-        "user": {
-            "id": user_data[0],
-            "username": user_data[1],
-            "email": user_data[2],
-            "balance": user_data[3],
-            "total_spent": user_data[4],
-            "tier_level": user_data[5],
-            "tier_name": user_data[6]
-        }
-    }
-
-@app.get("/api/auth/me")
-async def get_current_user():
-    """Get current user info"""
-    # TODO: Implement proper JWT validation
-    return {"message": "User info endpoint"}
-
-# Services endpoints
-@app.get("/api/services")
-async def get_services():
-    """Get all services"""
-    conn = sqlite3.connect('smm_panel.db')
-    cursor = conn.cursor()
-    
-    cursor.execute('SELECT * FROM services WHERE status = "active"')
-    services = cursor.fetchall()
-    conn.close()
-    
-    return {
-        "services": [
-            {
-                "id": s[0],
-                "name": s[1],
-                "category": s[2],
-                "rate": s[3],
-                "min_quantity": s[4],
-                "max_quantity": s[5],
-                "provider": s[6],
-                "description": s[8]
-            }
-            for s in services
-        ]
-    }
-
-# Admin endpoints
 @app.get("/api/admin/stats")
-async def get_admin_stats():
-    """Get admin dashboard stats"""
-    conn = sqlite3.connect('smm_panel.db')
+def get_admin_stats():
+    """Get admin dashboard statistics"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
     # Get user count
-    cursor.execute('SELECT COUNT(*) FROM users')
-    total_users = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) as count FROM users")
+    user_count = cursor.fetchone()["count"]
     
     # Get order count
-    cursor.execute('SELECT COUNT(*) FROM orders')
-    total_orders = cursor.fetchone()[0]
+    cursor.execute("SELECT COUNT(*) as count FROM orders")
+    order_count = cursor.fetchone()["count"]
     
     # Get total revenue
-    cursor.execute('SELECT SUM(charge) FROM orders WHERE status = "completed"')
-    total_revenue = cursor.fetchone()[0] or 0
+    cursor.execute("SELECT SUM(charge) as total FROM orders WHERE status = 'completed'")
+    total_revenue = cursor.fetchone()["total"] or 0
     
     conn.close()
     
     return {
-        "stats": {
-            "totalUsers": total_users,
-            "totalOrders": total_orders,
-            "totalRevenue": total_revenue,
-            "apiStatus": "Online"
-        },
-        "recentOrders": [],
-        "recentUsers": []
+        "users": user_count,
+        "orders": order_count,
+        "revenue": total_revenue,
+        "timestamp": datetime.now().isoformat()
     }
 
-@app.get("/api/admin/users")
-async def get_admin_users():
-    """Get users for admin"""
-    conn = sqlite3.connect('smm_panel.db')
+@app.get("/api/users")
+def get_users():
+    """Get all users"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    cursor.execute('SELECT id, username, email, balance, total_spent, status, created_at FROM users')
-    users = cursor.fetchall()
+    cursor.execute("""
+        SELECT id, username, email, balance, total_spent, 
+               tier_level, tier_name, status, created_at
+        FROM users 
+        ORDER BY created_at DESC
+    """)
+    
+    users = [dict(row) for row in cursor.fetchall()]
     conn.close()
     
-    return {
-        "users": [
-            {
-                "id": u[0],
-                "username": u[1],
-                "email": u[2],
-                "balance": u[3],
-                "total_spent": u[4],
-                "is_active": u[5] == "active",
-                "created_at": u[6]
-            }
-            for u in users
-        ],
-        "total": len(users),
-        "page": 1,
-        "per_page": 20
-    }
+    return {"users": users}
 
-@app.get("/api/admin/orders")
-async def get_admin_orders():
-    """Get orders for admin"""
-    conn = sqlite3.connect('smm_panel.db')
+@app.get("/api/orders")
+def get_orders():
+    """Get all orders"""
+    conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     cursor = conn.cursor()
     
-    cursor.execute('''
-        SELECT o.id, o.user_id, u.email, s.name, o.charge, o.status, o.created_at
+    cursor.execute("""
+        SELECT o.id, o.user_id, u.username, o.service_id, o.link, 
+               o.quantity, o.charge, o.status, o.start_count, o.remains,
+               o.created_at, o.updated_at
         FROM orders o
         JOIN users u ON o.user_id = u.id
-        JOIN services s ON o.service_id = s.id
         ORDER BY o.created_at DESC
-    ''')
-    orders = cursor.fetchall()
+    """)
+    
+    orders = [dict(row) for row in cursor.fetchall()]
     conn.close()
     
-    return {
-        "orders": [
-            {
-                "id": o[0],
-                "user_id": o[1],
-                "user_email": o[2],
-                "service_name": o[3],
-                "price": o[4],
-                "status": o[5],
-                "created_at": o[6]
-            }
-            for o in orders
-        ],
-        "total": len(orders),
-        "page": 1,
-        "per_page": 20
-    }
+    return {"orders": orders}
 
-@app.get("/api/admin/deposits")
-async def get_admin_deposits():
-    """Get deposits for admin"""
-    conn = sqlite3.connect('smm_panel.db')
-    cursor = conn.cursor()
+# === SERVICES MANAGEMENT ENDPOINTS ===
+
+@app.post("/api/services/sync")
+def sync_services():
+    """Sync services from Likeviet API"""
+    result = service_manager.sync_services_from_likeviet()
+    return result
+
+@app.get("/api/services")
+def get_services(
+    category = None,
+    platform = None,
+    enabled_only = True,
+    search = None
+):
+    """Get all services with filters"""
+    print("[API] GET /api/services")
+    print("[API] category=" + str(category))
+    print("[API] platform=" + str(platform))
+    print("[API] search=" + str(search))
     
-    cursor.execute('SELECT * FROM deposits')
-    deposits = cursor.fetchall()
-    conn.close()
+    try:
+        if search:
+            services = service_manager.search_services(search)
+        else:
+            services = service_manager.get_all_services(
+                enabled_only=enabled_only,
+                category=category,
+                platform=platform
+            )
+        
+        print("[API] Returning " + str(len(services)) + " services")
+        return {"services": services, "count": len(services)}
     
-    return {
-        "deposits": [
-            {
-                "id": d[0],
-                "user_id": d[1],
-                "amount": d[2],
-                "method": d[3],
-                "status": d[6],
-                "created_at": d[7]
-            }
-            for d in deposits
-        ],
-        "total": len(deposits),
-        "page": 1,
-        "per_page": 20
+    except Exception as e:
+        print("[API] Error: " + str(e))
+        return {"services": [], "error": str(e)}
+
+@app.get("/api/services/categories")
+def get_categories():
+    """Get all service categories with counts"""
+    print("[API] GET /api/services/categories")
+    try:
+        categories = service_manager.get_categories()
+        return {"categories": categories}
+    except Exception as e:
+        print("[API] Error: " + str(e))
+        return {"categories": [], "error": str(e)}
+
+@app.get("/api/services/platforms")
+def get_platforms():
+    """Get all platforms"""
+    print("[API] GET /api/services/platforms")
+    platforms = service_manager.get_platforms()
+    return {"platforms": platforms}
+
+@app.get("/api/services/{likeviet_id}")
+def get_service(likeviet_id):
+    """Get service by Likeviet ID"""
+    print("[API] GET /api/services/{}".format(likeviet_id))
+    service = service_manager.get_service_by_id(likeviet_id)
+    if not service:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return service
+
+@app.put("/api/services/{likeviet_id}/markup")
+def update_service_markup(likeviet_id, markup_percent):
+    """Update service markup percentage"""
+    print("[API] PUT /api/services/{}/markup - {}%".format(likeviet_id, markup_percent))
+    success = service_manager.update_service_markup(likeviet_id, markup_percent)
+    if not success:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return {"success": True, "markup_percent": markup_percent}
+
+@app.put("/api/services/{likeviet_id}/toggle")
+def toggle_service_status(likeviet_id):
+    """Toggle service active status"""
+    print("[API] PUT /api/services/{}/toggle".format(likeviet_id))
+    success = service_manager.toggle_service(likeviet_id)
+    if not success:
+        raise HTTPException(status_code=404, detail="Service not found")
+    return {"success": True}
+
+# === LIKEVIET API ENDPOINTS ===
+
+LIKEVIET_API_BASE = "https://likeviet.vn/api/v2"
+LIKEVIET_API_KEY = "c827f930b6fbe6dc726f5ed7429b31b7"
+
+@app.get("/api/likeviet/balance")
+def get_likeviet_balance():
+    """Get Likeviet account balance"""
+    print("[API] GET /api/likeviet/balance")
+    
+    payload = {
+        "key": LIKEVIET_API_KEY,
+        "action": "balance"
     }
+    
+    try:
+        response = httpx.post(LIKEVIET_API_BASE, data=payload, timeout=10.0)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": "Request failed: {}".format(str(e))}
+
+@app.get("/api/likeviet/services")
+def get_likeviet_services():
+    """Get available services from Likeviet"""
+    print("[API] GET /api/likeviet/services")
+    
+    payload = {
+        "key": LIKEVIET_API_KEY,
+        "action": "services"
+    }
+    
+    try:
+        response = httpx.post(LIKEVIET_API_BASE, data=payload, timeout=60)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": "Request failed: {}".format(str(e))}
+
+@app.post("/api/likeviet/order")
+def create_likeviet_order(service_id, link, quantity):
+    """Create new Likeviet order"""
+    print("[API] POST /api/likeviet/order - service_id={}, quantity={}".format(service_id, quantity))
+    
+    payload = {
+        "key": LIKEVIET_API_KEY,
+        "action": "add",
+        "service": service_id,
+        "link": link,
+        "quantity": quantity
+    }
+    
+    try:
+        response = httpx.post(LIKEVIET_API_BASE, data=payload, timeout=10.0)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": "Request failed: {}".format(str(e))}
+
+@app.get("/api/likeviet/order/{order_id}")
+def get_order_status(order_id):
+    """Check Likeviet order status"""
+    print("[API] GET /api/likeviet/order/{}".format(order_id))
+    
+    payload = {
+        "key": LIKEVIET_API_KEY,
+        "action": "status",
+        "order": order_id
+    }
+    
+    try:
+        response = httpx.post(LIKEVIET_API_BASE, data=payload, timeout=10.0)
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        return {"error": "Request failed: {}".format(str(e))}
 
 if __name__ == "__main__":
+    import httpx
     uvicorn.run(app, host="0.0.0.0", port=8000)
